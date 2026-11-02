@@ -120,7 +120,7 @@
 - [x] **0. 뼈대** — New Project(Compose), Git, `.gitignore` 보강, S26 빌드 확인, CLAUDE.md · PLAN.md
 - [x] **1. 주기 계산 (`:core`)** — `:core` 모듈 추가, `kotlinx-datetime`, 모델 · `nextDue` · `occurrencesIn` · `overdueDays`
   - 완료 기준: 단위 시험 — 일/주/개월 · 월말(1/31+1개월) · 윤년 · 늦게/일찍 완료 · 반복 없음 · 체크 취소 후 재계산
-- [ ] **2. 저장 (Room)** — 엔티티 · DAO · 리포지토리 · 등록 시 "마지막으로 한 날" 처리
+- [x] **2. 저장 (Room)** — 엔티티 · DAO · 리포지토리 · 등록 시 "마지막으로 한 날" 처리
   - 완료 기준: DAO 시험(체크 · 취소 · 같은 날 중복 거부 · 루틴 삭제 시 기록 삭제), DB 스키마 내보내기(`exportSchema`)로 이후 마이그레이션 대비
   - 세부 계획 (2026-11-02)
     - 선택: Room 2.8.5(KMP 지원) + KSP 2.3.x(AGP 9 내장 Kotlin 지원), Room Gradle 플러그인으로 `app/schemas/` 에 스키마 JSON(커밋함). DAO 시험은 Robolectric + 메모리 DB(`app/src/test`, 기기 없이)
