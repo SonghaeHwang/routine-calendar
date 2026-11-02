@@ -122,6 +122,16 @@
   - 완료 기준: 단위 시험 — 일/주/개월 · 월말(1/31+1개월) · 윤년 · 늦게/일찍 완료 · 반복 없음 · 체크 취소 후 재계산
 - [ ] **2. 저장 (Room)** — 엔티티 · DAO · 리포지토리 · 등록 시 "마지막으로 한 날" 처리
   - 완료 기준: DAO 시험(체크 · 취소 · 같은 날 중복 거부 · 루틴 삭제 시 기록 삭제), DB 스키마 내보내기(`exportSchema`)로 이후 마이그레이션 대비
+  - 세부 계획 (2026-11-02)
+    - 선택: Room 2.8.5(KMP 지원) + KSP 2.3.x(AGP 9 내장 Kotlin 지원), Room Gradle 플러그인으로 `app/schemas/` 에 스키마 JSON(커밋함). DAO 시험은 Robolectric + 메모리 DB(`app/src/test`, 기기 없이)
+    - 저장 형식: `LocalDate` → ISO 문자열(문자열 순서 = 날짜 순서), enum → 이름, `created_at` → epoch millis `Long`(Kotlin 2.2 의 `kotlin.time.Instant` opt-in 피함). 오늘 날짜는 `:app` 에서 구해 주입
+    - 파일(`data/`): 엔티티 2개 · `@Relation` 조회 묶음 · `LocalDate` 변환기 · `RoutineDao`(등록 + 초기 완료 기록을 한 트랜잭션) · `AppDatabase` · `Mappers` · `RoutineDraft` · `RoutineRepository`. 패키지 루트에 `AppContainer` · `RoutineCalendarApp`(Manifest 등록)
+    - 리포지토리: `observeRoutines()` 가 루틴 + 완료 기록을 Flow 하나로 내보낸다(오늘 · 캘린더가 같은 흐름에 `:core` 를 얹어 일치). `add(draft, lastDoneOn)` · `update` · `setArchived` · `delete` · `check` · `uncheck`
+    - 같은 날 중복 체크는 `IGNORE` 로 무시하고 `Boolean` 으로 알린다. 체크 취소는 `(routine_id, done_on)` 으로 지운다
+    - 시험: `RoutineDaoTest`(완료 기준 4가지 · 없는 루틴 체크 예외 · 보관 제외 · 수정 시 `first_due` 유지 · Flow 갱신) · `RoutineRepositoryTest`(마지막으로 한 날 처리 · 빈 제목 · 미래 날짜 거부 · 취소 후 재계산) · `MappersTest`
+    - 순서(단계마다 커밋): ① 빌드 설정 → ② 엔티티 · DB · 스키마 → ③ DAO + 시험 → ④ 리포지토리 + 시험 → ⑤ AppContainer · Application → ⑥ 문서
+    - 하지 않음: DataStore(4 · 5단계에서 처음 필요할 때), 마이그레이션 · `room-testing`(버전 2 때), 별도 KMP `:data` 모듈 · Room 3(iOS 이전 때), 기간별 조회, 계측 시험
+    - 위험 대비: KSP 생성 소스 오류 → `android.disallowKotlinSourceSets=false`, Room 플러그인 충돌 → `ksp { arg("room.schemaLocation", …) }`, Robolectric 이 SDK 37 미지원 → `sdk=36`
 - [ ] **3. 등록 · 루틴 목록 · 오늘 화면** — 하단 탭, 프리셋, 체크
   - 완료 기준: 실제 루틴 5개 이상 등록해서 사흘 써 보기
 - [ ] **4. 캘린더** — 월 그리드(라이브러리 없이 `LazyVerticalGrid` 로 직접), 날짜별 목록, 지난 날짜 체크
