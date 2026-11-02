@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 android {
@@ -34,6 +36,15 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        // Robolectric 이 리소스 · Manifest 를 읽도록
+        unitTests.isIncludeAndroidResources = true
+    }
+}
+
+room {
+    // 스키마 JSON 은 커밋해서 이후 마이그레이션 기준으로 쓴다
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
@@ -46,7 +57,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
