@@ -30,7 +30,7 @@
 - **확인 창이 뜨지 않게 명령을 단순하게 쓴다.** 허용 목록에 있는 명령(`.\gradlew.bat ...` · `git status` · `git diff` · `git log` · `git add` · `git commit` · `git push`)은 확인 없이 실행된다. 이것들을 `if` · `$변수=` · `;` 로 이어 붙인 한 줄 스크립트로 만들면 통째로 새 명령이 되어 확인 창이 뜬다. 그래서
   - 빌드 · 시험과 git 명령은 **각각 따로** 실행하고, 앞 명령의 결과(통과/실패)를 보고 다음 명령을 실행한다
   - `if` · `ForEach-Object` · `Copy-Item` · `New-Item` 으로 감싸거나 로그를 임시 폴더에 복사하지 않는다. 시험 결과는 `app/build/test-results` 를 바로 읽는다
-  - 커밋 메시지는 임시 파일(`-F msg.txt`) 대신 `git commit -m "제목" -m "본문"` 으로 쓴다
+  - 커밋 메시지는 임시 파일(`-F msg.txt`) 대신 `git commit -m '제목' -m '본문'` 으로 쓴다 (따옴표 규칙은 아래 "커밋 규칙")
 
 ## 기술 선택 (확정)
 
@@ -68,4 +68,5 @@
   - scope: `core` · `data` · `ui` · `calendar` · `notify` · `widget` · `backup` · `release`
 - 본문에는 왜 바꿨는지와 주요 변경점을 `-` 목록으로. 한 커밋에는 한 가지 일만
 - 예: `feat(core): 완료일 기준 다음 예정일 계산 추가`
+- **따옴표 규칙 (PowerShell).** `-m` 인자는 작은따옴표 `'...'` 로 감싸고, 메시지 안에 `"` · `$` · `` ` `` 를 쓰지 않는다(인용은 「」). PowerShell 에서 `\"` 는 이스케이프가 아니라 문자열을 끝내 명령이 깨지고, `$` 는 변수, `` ` `` 는 이스케이프로 해석된다
 - 커밋 · 푸시는 묻지 않고 한다. 작업 단위가 끝나고 `./gradlew test assembleDebug` 가 통과하면 커밋하고 `origin/main` 에 푸시한다. 강제 푸시 · 이미 푸시한 커밋의 수정(amend · rebase)은 하지 않는다
