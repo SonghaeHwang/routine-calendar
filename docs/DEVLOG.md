@@ -48,6 +48,11 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
     - `created_at` 은 계산에 쓰지 않아 `:core` 모델에서 뺀다. 2단계 Room 엔티티에만 둔다
     - 프리셋은 3단계로 미룸
   - PLAN 1단계 완료
+- **커밋 · 푸시**
+  - `core/build/` 가 무시되지 않아 빌드 산출물이 `git add` 에 잡히는 것을 발견 → `app/.gitignore` 와 같게 `core/.gitignore`(`/build`) 추가
+  - 한 커밋에 한 가지 일 규칙대로 둘로 나눔: `a3ae70f feat(core): 주기 계산 모듈과 단위 시험 추가`(코드 · Gradle 12개 파일) · `8523273 docs: 1단계 완료와 개발 일지 기록`(PLAN · DEVLOG)
+  - 커밋 규칙 변경: 작업 단위가 끝나고 `test assembleDebug` 가 통과하면 묻지 않고 커밋 · `origin/main` 푸시. 강제 푸시와 푸시한 커밋의 amend · rebase 는 계속 금지 → `756e5dc docs: 커밋 · 푸시를 묻지 않고 하도록 규칙 변경`
+  - 세 커밋을 GitHub 에 푸시(`main` = `origin/main`)
 
 ### 진행 중
 
@@ -80,9 +85,16 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
 - **Android Studio Claude 의 도구가 자주 시간 초과**
   - 증상: IDE 빌드 도구 · 셸 명령이 `The operation timed out.` 을 내고 멈춘 것처럼 보임. 실제로는 뒤에서 빌드가 계속 돌아 성공해 있었음
   - 해결: Gradle 을 셸에서 백그라운드로 돌리고 로그 파일과 `core/build/test-results` 의 시험 결과 XML(시각 · 실패 수)로 확인. 시간 초과를 실패로 보지 말고 결과 파일을 확인한다
+- **`git commit` · `git push` 가 시간 초과로 멈춘 것처럼 보임**
+  - 증상: `git log` · `git status` 는 1초 안에 끝나는데 `git commit -F <메시지 파일>` 과 `git push` 만 `The operation timed out.` 후 커밋이 없는 것으로 보임
+  - 확인한 것: `.git/hooks` 에 hook 없음, 커밋 서명(`commit.gpgsign`) 설정 없음, `core.editor` 는 `code --wait` 지만 `-F` 를 써서 편집기는 열리지 않음
+  - 결과: 시간이 지난 뒤 보니 두 커밋이 정상으로 만들어져 있었고, 푸시도 시간 초과 표시와 달리 올라가 있었음. 원인은 확실하지 않음 — IDE 가 AI 의 파일 변경을 "수락" 하기 전이었거나 셸 명령 승인 대기였을 가능성
+  - 해결: 시간 초과가 떠도 다시 실행하지 말고 `git log --oneline` · `git status -sb` 로 결과부터 확인한다(중복 커밋 방지)
 
 ### 메모
 
 - Android Studio 의 AI 패널에서 Claude 를 고르면 Android Studio 도구(Gradle 빌드 · 기기 배포 · Compose 미리보기 · Logcat)를 쓸 수 있다. 앱 코드는 그쪽 Claude, 계획 · 문서 · 일지는 VS Code 의 Claude 로 나눠 쓴다. 두 Claude 가 같은 파일을 동시에 고치지 않는다
 - 휴대폰이 필요 없는 작업(1단계 `:core` 단위 시험 등)에는 무선 디버깅을 끄고 자동 차단을 켜 둔다. 휴대폰 설치 · 화면 확인이 필요할 때만 켠다
 - 정하지 않은 것: 앱 이름 · 아이콘, "주 N회" 지원 여부, Android 자동 백업 사용 여부
+- Android Studio 의 Claude 는 "Claude Code 플러그인(JetBrains)" 이 아니라 Android Studio AI 패널에서 모델로 Claude 를 고른 방식. 안에서는 Claude Agent SDK 로 Claude Code 엔진이 돌고, Android Studio 가 자체 도구(`studio_*`)와 지시문을 얹는다
+- 한국어 언어 팩: AI 도구로는 플러그인 설치 · IDE 언어 변경을 할 수 없어 직접 하기로 함 — Settings → Plugins → Marketplace 에서 "Korean Language Pack / 한국어 언어 팩" 설치 후 재시작(안 바뀌면 Appearance & Behavior → System Settings → Language and Region). Android Studio 는 IntelliJ 보다 플랫폼 버전이 늦어 "Incompatible" 일 수 있고, Android 전용 메뉴는 영어로 남을 수 있다
