@@ -13,12 +13,15 @@ import kotlinx.datetime.daysUntil
  * [completions] 에 다른 루틴의 기록이 섞여 있어도 이 루틴 것만 본다.
  */
 fun nextDue(routine: Routine, completions: Collection<Completion>): LocalDate? {
-    val lastDone = completions
-        .filter { it.routineId == routine.id }
-        .maxOfOrNull { it.doneOn }
-        ?: return routine.firstDue
+    val lastDone = lastDoneOn(routine, completions) ?: return routine.firstDue
     return if (routine.repeats) routine.interval.addTo(lastDone) else null
 }
+
+/** 마지막으로 한 날. 기록이 없으면 null. 다른 루틴의 기록은 무시한다. */
+fun lastDoneOn(routine: Routine, completions: Collection<Completion>): LocalDate? =
+    completions
+        .filter { it.routineId == routine.id }
+        .maxOfOrNull { it.doneOn }
 
 /**
  * [range] 안에 들어오는 예정일(추정치). 다음 예정일부터 주기씩 더해 펼친다.

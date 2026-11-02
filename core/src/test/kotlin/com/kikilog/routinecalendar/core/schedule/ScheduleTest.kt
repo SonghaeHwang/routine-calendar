@@ -109,6 +109,18 @@ class ScheduleTest {
         assertEquals(d("2026-11-02"), nextDue(r, listOf(done("2026-11-05", routineId = 2))))
     }
 
+    // ── lastDoneOn ──
+
+    @Test
+    fun `마지막으로 한 날 - 가장 늦은 기록, 없으면 null, 다른 루틴 무시`() {
+        val r = routine(10, DAY, "2026-11-02")
+        assertNull(lastDoneOn(r, emptyList()))
+        assertEquals(
+            d("2026-11-02"),
+            lastDoneOn(r, listOf(done("2026-10-20"), done("2026-11-02"), done("2026-11-05", routineId = 2))),
+        )
+    }
+
     // ── occurrencesIn ──
 
     private fun range(from: String, to: String) = d(from)..d(to)
