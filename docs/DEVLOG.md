@@ -36,10 +36,22 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
   - `CLAUDE.md`(규칙 · 기술 선택 · 커밋 규칙), `docs/PLAN.md`(화면 · 데이터 구조 · 개발 순서 0~10단계) 작성
   - 첫 커밋 `ec58b1f chore: 프로젝트 뼈대와 제작 계획 추가`, GitHub private 저장소 만들고 push
   - PLAN 0단계(뼈대) 완료
+- **PLAN 1단계 — 주기 계산(`:core`)**
+  - `:core` 모듈 추가: 순수 Kotlin/JVM(`org.jetbrains.kotlin.jvm`, Java 11), `kotlinx-datetime` 0.8.0 을 `api` 로 노출. `:app` 이 `:core` 를 의존하도록 연결
+  - 모델: `Category` · `Interval`(일/주/개월, `addTo(date, times)`) · `Routine` · `Completion`
+  - 계산: `nextDue`(마지막 완료일 + 주기, 없으면 `firstDue`, 반복 없음은 완료 시 끝) · `occurrencesIn`(날짜 범위 안 예정일 추정) · `overdueDays` · `initialSchedule`(등록 때 첫 예정일과 함께 저장할 완료 기록)
+  - 단위 시험 30개 통과(`IntervalTest` 7 · `ScheduleTest` 23): 일/주/개월 · 월말(1/31+1개월=2/28) · 윤년(2028-02-29) · 늦게/일찍 완료 · 반복 없음 · 체크 취소 후 재계산 · 다른 루틴 기록 무시 · 등록 규칙
+  - `./gradlew test assembleDebug --rerun-tasks` 통과
+  - 설계 결정
+    - 개월 단위를 펼칠 때 앞 날짜에 계속 더하지 않고 `기준일 + 주기 × k` 로 계산 — 이어 더하면 1/31 → 2/28 → 3/28 로 밀린다. 지금은 1/31 → 2/28 → 3/31
+    - `occurrencesIn` 은 달 대신 날짜 범위를 받는다. 캘린더 그리드에 앞뒤 달 날짜도 보이기 때문
+    - `created_at` 은 계산에 쓰지 않아 `:core` 모델에서 뺀다. 2단계 Room 엔티티에만 둔다
+    - 프리셋은 3단계로 미룸
+  - PLAN 1단계 완료
 
 ### 진행 중
 
-- PLAN 1단계 — `:core` 모듈에 주기 계산(`nextDue` · `occurrencesIn` · `overdueDays`)과 단위 시험. Android Studio 의 Claude 가 작업 중(아직 커밋 전). 끝나면 그 내용과 막힌 점을 이 절에 덧붙인다
+- PLAN 2단계(Room) 준비 — 엔티티 · DAO · 리포지토리, 등록 시 `initialSchedule` 결과로 완료 기록 저장
 
 ### 막힌 점
 
@@ -58,6 +70,16 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
   - 증상: `git add` 때 모든 파일에 "LF will be replaced by CRLF" 경고
   - 원인: Windows git 의 줄바꿈 자동 변환. `gradlew` 가 CRLF 가 되면 Linux CI 에서 실행되지 않는다
   - 해결: `.gitattributes` 로 `gradlew` 는 LF, `*.bat` 는 CRLF 로 고정하고 `git ls-files --eol` 로 확인
+- **PLAN 의 등록 규칙이 반복 없는 루틴과 모순**
+  - 증상: "마지막으로 한 날을 넣으면 그날을 완료 기록으로 저장" 을 반복 없음("화장지 2달 후")에도 적용하면, 등록하자마자 완료 기록이 생겨 루틴이 끝난 것으로 계산됨
+  - 해결: 반복하는 루틴만 완료 기록을 남기고, 반복 없음은 `first_due = 그날 + 주기` 만 정한다. PLAN.md 문구도 고침. 시험 `등록 - 반복 없음, 마지막으로 한 날을 넣어도 기록은 남기지 않는다` 로 고정
+- **빌드 파일의 `alias(libs.plugins.kotlin.jvm)` 에 빨간 줄**
+  - 증상: `Argument type mismatch: actual type is 'JvmToolchainManagement', but 'Provider<PluginDependency>' was expected`
+  - 원인: 버전 카탈로그에 `kotlin-jvm` 을 넣은 뒤 동기화 전이라 접근자가 아직 없어서, IDE 가 `jvm` 을 Gradle 의 `toolchainManagement.jvm` 으로 잘못 해석
+  - 해결: Gradle 동기화 후 사라짐(코드 문제 아님)
+- **Android Studio Claude 의 도구가 자주 시간 초과**
+  - 증상: IDE 빌드 도구 · 셸 명령이 `The operation timed out.` 을 내고 멈춘 것처럼 보임. 실제로는 뒤에서 빌드가 계속 돌아 성공해 있었음
+  - 해결: Gradle 을 셸에서 백그라운드로 돌리고 로그 파일과 `core/build/test-results` 의 시험 결과 XML(시각 · 실패 수)로 확인. 시간 초과를 실패로 보지 말고 결과 파일을 확인한다
 
 ### 메모
 
