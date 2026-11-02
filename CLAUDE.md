@@ -27,7 +27,10 @@
   - **해제**: 파일을 복사 · 이동 · 삭제 · 덮어쓰는 명령(`Copy-Item` · `Move-Item` · `Remove-Item` · `Set-Content` · `Out-File`), `adb` 로 기기를 바꾸는 명령, 명령이 아닌 글자(`"ok"` · `"EXIT=..."`), 처음 보는 프로그램
   - **거절 추천**: 프로젝트 밖 파일 수정 · 삭제, `git push --force` · `git reset --hard` · `git rebase`, `adb uninstall` · `adb shell pm clear`, 모르는 주소에서 내려받아 실행
 - 빌드 파일(`*.gradle.kts` · `libs.versions.toml`)을 고칠 때는 "하는 일"에 추가 · 변경하는 라이브러리 이름과 버전을 적는다.
-- 같은 목적의 명령을 여러 번 나눠 실행하지 말고 한 번에 묶는다 (확인 창을 줄이기 위해).
+- **확인 창이 뜨지 않게 명령을 단순하게 쓴다.** 허용 목록에 있는 명령(`.\gradlew.bat ...` · `git status` · `git diff` · `git log` · `git add` · `git commit` · `git push`)은 확인 없이 실행된다. 이것들을 `if` · `$변수=` · `;` 로 이어 붙인 한 줄 스크립트로 만들면 통째로 새 명령이 되어 확인 창이 뜬다. 그래서
+  - 빌드 · 시험과 git 명령은 **각각 따로** 실행하고, 앞 명령의 결과(통과/실패)를 보고 다음 명령을 실행한다
+  - `if` · `ForEach-Object` · `Copy-Item` · `New-Item` 으로 감싸거나 로그를 임시 폴더에 복사하지 않는다. 시험 결과는 `app/build/test-results` 를 바로 읽는다
+  - 커밋 메시지는 임시 파일(`-F msg.txt`) 대신 `git commit -m "제목" -m "본문"` 으로 쓴다
 
 ## 기술 선택 (확정)
 
