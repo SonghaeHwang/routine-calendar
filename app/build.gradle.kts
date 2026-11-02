@@ -37,8 +37,18 @@ android {
         compose = true
     }
     testOptions {
-        // Robolectric 이 리소스 · Manifest 를 읽도록
-        unitTests.isIncludeAndroidResources = true
+        unitTests {
+            // Robolectric 이 리소스 · Manifest 를 읽도록
+            isIncludeAndroidResources = true
+            all {
+                // 새 JDK 에서 Robolectric 이 FileDescriptor 내부(jdk.internal.access)에 접근하도록 열어 준다
+                it.jvmArgs(
+                    "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
+                    "--add-opens=java.base/java.io=ALL-UNNAMED",
+                    "--enable-native-access=ALL-UNNAMED",
+                )
+            }
+        }
     }
 }
 
