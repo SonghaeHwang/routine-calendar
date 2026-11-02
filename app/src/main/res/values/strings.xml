@@ -1,3 +1,46 @@
 <resources>
     <string name="app_name">Routine Calendar</string>
+
+    <!-- 하단 탭 · 공통 -->
+    <string name="tab_today">오늘</string>
+    <string name="tab_calendar">캘린더</string>
+    <string name="tab_routines">루틴</string>
+    <string name="settings">설정</string>
+    <string name="add_routine">루틴 추가</string>
+    <string name="back">뒤로</string>
+    <string name="more">더보기</string>
+
+    <!-- 오늘 화면 -->
+    <string name="section_overdue">지난 것</string>
+    <string name="section_today">오늘</string>
+    <string name="section_this_week">이번 주</string>
+    <string name="empty_today">오늘과 이번 주에 할 루틴이 없어요</string>
+    <plurals name="overdue_days">
+        <item quantity="other">%1$d일 지남</item>
+    </plurals>
+
+    <!-- 루틴 목록 -->
+    <string name="empty_routines">아직 등록한 루틴이 없어요</string>
+
+    <!-- 분류 -->
+    <string name="category_house">집안일</string>
+    <string name="category_beauty">뷰티</string>
+    <string name="category_supply">구매</string>
+    <string name="category_etc">기타</string>
+
+    <!-- 주기 -->
+    <string name="interval_every_day">%1$d일마다</string>
+    <string name="interval_every_week">%1$d주마다</string>
+    <string name="interval_every_month">%1$d개월마다</string>
+    <string name="interval_once_day">%1$d일 후 한 번</string>
+    <string name="interval_once_week">%1$d주 후 한 번</string>
+    <string name="interval_once_month">%1$d개월 후 한 번</string>
+
+    <!-- 캘린더 (4단계에서 채움) -->
+    <string name="calendar_placeholder">캘린더는 다음 단계에서 만들어요</string>
+
+    <!-- 설정 -->
+    <string name="settings_privacy_title">개인정보</string>
+    <string name="settings_privacy_body">모든 기록은 이 휴대폰에만 저장돼요. 인터넷 연결 · 수집 · 공유가 없어요.</string>
+    <string name="settings_version">앱 버전</string>
 </resources>
