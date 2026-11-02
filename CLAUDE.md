@@ -44,4 +44,4 @@
   - scope: `core` · `data` · `ui` · `calendar` · `notify` · `widget` · `backup` · `release`
 - 본문에는 왜 바꿨는지와 주요 변경점을 `-` 목록으로. 한 커밋에는 한 가지 일만
 - 예: `feat(core): 완료일 기준 다음 예정일 계산 추가`
-- 커밋 · 푸시는 사용자가 요청할 때만 한다. 강제 푸시하지 않는다
+- 커밋 · 푸시는 묻지 않고 한다. 작업 단위가 끝나고 `./gradlew test assembleDebug` 가 통과하면 커밋하고 `origin/main` 에 푸시한다. 강제 푸시 · 이미 푸시한 커밋의 수정(amend · rebase)은 하지 않는다
