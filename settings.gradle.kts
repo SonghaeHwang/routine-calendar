@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Routine Calendar"
 include(":app")
+include(":core")
