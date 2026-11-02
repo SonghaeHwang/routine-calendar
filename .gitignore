@@ -1,0 +1,30 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Kotlin 2.x 작업 폴더
+.kotlin/
+
+# 서명 키 · 비밀값 (저장소에 올리지 않는다)
+*.jks
+*.keystore
+keystore.properties
+*.env
+.env
+
+# 출시 산출물
+/app/release/
+*.aab
+*.apk

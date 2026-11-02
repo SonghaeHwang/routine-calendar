@@ -1,0 +1,8 @@
+# 기본은 git 이 줄바꿈을 맞추고, 셸 스크립트는 LF · 배치 파일은 CRLF 로 고정
+* text=auto
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.jar binary
+*.webp binary
+*.png binary
