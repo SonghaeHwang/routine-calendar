@@ -15,6 +15,8 @@ import androidx.room.TypeConverters
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
+    abstract fun routineDao(): RoutineDao
+
     companion object {
         private const val FILE_NAME = "routine-calendar.db"
 
