@@ -9,6 +9,7 @@
     <string name="add_routine">루틴 추가</string>
     <string name="back">뒤로</string>
     <string name="more">더보기</string>
+    <string name="edit_placeholder">등록 화면은 다음 작업에서 만들어요</string>
 
     <!-- 오늘 화면 -->
     <string name="section_overdue">지난 것</string>

@@ -4,44 +4,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.kikilog.routinecalendar.ui.navigation.RoutineCalendarRoot
 import com.kikilog.routinecalendar.ui.theme.RoutineCalendarTheme
 
 class MainActivity : ComponentActivity() {
+
+    private val container get() = (application as RoutineCalendarApp).container
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             RoutineCalendarTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                RoutineCalendarRoot()
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    RoutineCalendarTheme {
-        Greeting("Android")
+    override fun onResume() {
+        super.onResume()
+        // 밤새 잠든 뒤 켰을 때 자정 대기가 늦게 깨어날 수 있어, 화면이 보일 때마다 오늘을 다시 읽는다
+        container.todayClock.refresh()
     }
 }
