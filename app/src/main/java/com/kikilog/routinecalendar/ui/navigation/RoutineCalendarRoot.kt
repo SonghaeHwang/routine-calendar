@@ -22,7 +22,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.kikilog.routinecalendar.ui.calendar.CalendarPlaceholder
 import com.kikilog.routinecalendar.ui.edit.EditRoutinePlaceholder
 import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
-import com.kikilog.routinecalendar.ui.routines.RoutinesPlaceholder
+import com.kikilog.routinecalendar.ui.routines.RoutinesRoute
 import com.kikilog.routinecalendar.ui.settings.SettingsScreen
 import com.kikilog.routinecalendar.ui.today.TodayPlaceholder
 
@@ -68,7 +68,9 @@ fun RoutineCalendarRoot() {
             entryProvider = entryProvider {
                 entry<TodayKey> { TodayPlaceholder(onAdd = { openEdit(null) }, onOpenSettings = openSettings) }
                 entry<CalendarKey> { CalendarPlaceholder(onOpenSettings = openSettings) }
-                entry<RoutinesKey> { RoutinesPlaceholder(onAdd = { openEdit(null) }, onOpenSettings = openSettings) }
+                entry<RoutinesKey> {
+                    RoutinesRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
+                }
                 entry<EditKey> { key ->
                     if (key.routineId == null) {
                         EditRoutineRoute(onDone = goBack)
