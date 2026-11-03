@@ -39,9 +39,19 @@ class RoutineRepository(
         )
     }
 
-    /** 이름 · 분류 · 주기 · 반복 · 알림만 바꾼다. first_due 와 기록은 그대로. 바꿨으면 true. */
-    suspend fun update(id: Long, draft: RoutineDraft): Boolean =
-        dao.updateRoutine(draft.validated().toEditColumns(id)) > 0
+    /**
+     * 이름 · 분류 · 주기 · 반복 · 알림을 바꾼다. 기록은 그대로. 바꿨으면 true.
+     * [firstDue] 는 완료 기록이 없을 때만 반영한다(자동 재계산은 하지 않는다 — 개월 빼기는 되돌릴 수 없어서).
+     * @throws IllegalArgumentException 제목이 비었거나, 기록이 있는 반복 루틴의 반복을 끄려 할 때(저장하자마자 끝남이 되므로)
+     */
+    suspend fun update(id: Long, draft: RoutineDraft, firstDue: LocalDate? = null): Boolean {
+        val valid = draft.validated()
+        val current = dao.routine(id) ?: return false
+        if (current.repeats && !valid.repeats) {
+            require(dao.completionsOf(id).isEmpty()) { "이미 한 기록이 있는 루틴은 반복을 끌 수 없습니다" }
+        }
+        return dao.updateWithFirstDue(valid.toEditColumns(id), firstDue) > 0
+    }
 
     suspend fun setArchived(id: Long, archived: Boolean): Boolean =
         dao.setArchived(id, archived) > 0

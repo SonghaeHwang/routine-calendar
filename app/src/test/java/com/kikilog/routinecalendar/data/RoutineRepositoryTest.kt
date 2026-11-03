@@ -160,6 +160,45 @@ class RoutineRepositoryTest {
     }
 
     @Test
+    fun `기록이 없으면 수정하면서 처음 할 날을 바꿸 수 있다`() = runTest {
+        val id = repo.add(draft(title = "화장지", amount = 2, unit = IntervalUnit.MONTH, repeats = false), lastDoneOn = null)
+        assertEquals(d("2027-01-02"), loaded(id).routine.firstDue)
+
+        assertTrue(
+            repo.update(id, draft(title = "화장지", amount = 3, unit = IntervalUnit.MONTH, repeats = false), firstDue = d("2027-02-02")),
+        )
+        assertEquals(d("2027-02-02"), loaded(id).routine.firstDue)
+    }
+
+    @Test
+    fun `기록이 있으면 처음 할 날은 바뀌지 않는다`() = runTest {
+        val id = repo.add(draft(), lastDoneOn = d("2026-10-20"))
+
+        assertTrue(repo.update(id, draft(title = "젤팩"), firstDue = d("2026-12-01")))
+        assertEquals("젤팩", loaded(id).routine.title)
+        assertEquals(d("2026-10-30"), loaded(id).routine.firstDue)
+    }
+
+    @Test
+    fun `기록이 있는 반복 루틴의 반복을 끄면 거부하고 바꾸지 않는다`() = runTest {
+        val id = repo.add(draft(), lastDoneOn = d("2026-10-20"))
+
+        val error = runCatching { repo.update(id, draft(title = "바뀜 이름", repeats = false)) }.exceptionOrNull()
+        assertTrue(error is IllegalArgumentException)
+        assertEquals("각질제거", loaded(id).routine.title)
+        assertTrue(loaded(id).routine.repeats)
+    }
+
+    @Test
+    fun `기록이 없으면 반복을 끌 수 있고, 없는 루틴 수정은 false`() = runTest {
+        val id = repo.add(draft(), lastDoneOn = null)
+
+        assertTrue(repo.update(id, draft(repeats = false)))
+        assertFalse(loaded(id).routine.repeats)
+        assertFalse(repo.update(999, draft()))
+    }
+
+    @Test
     fun `보관하면 기본 조회에서 빠지고 되돌릴 수 있다`() = runTest {
         val id = repo.add(draft(), lastDoneOn = null)
 

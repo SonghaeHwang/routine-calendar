@@ -37,6 +37,22 @@ abstract class RoutineDao {
     @Update(entity = RoutineEntity::class)
     abstract suspend fun updateRoutine(edit: RoutineEditColumns): Int
 
+    @Query("UPDATE routine SET first_due = :firstDue WHERE id = :id")
+    abstract suspend fun setFirstDue(id: Long, firstDue: LocalDate): Int
+
+    /**
+     * 수정. [firstDue] 는 완료 기록이 없을 때만 반영한다 — 기록이 있으면 다음 예정일은 기록으로 계산되므로.
+     * 루틴 수정과 한 트랜잭션이다.
+     */
+    @Transaction
+    open suspend fun updateWithFirstDue(edit: RoutineEditColumns, firstDue: LocalDate?): Int {
+        val updated = updateRoutine(edit)
+        if (updated > 0 && firstDue != null && completionsOf(edit.id).isEmpty()) {
+            setFirstDue(edit.id, firstDue)
+        }
+        return updated
+    }
+
     @Query("UPDATE routine SET archived = :archived WHERE id = :id")
     abstract suspend fun setArchived(id: Long, archived: Boolean): Int
 
