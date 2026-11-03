@@ -29,6 +29,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // 앱에서 바꾼 내용을 홈 화면 위젯에 알린다. 이미 시작했으면 아무 일도 없다
+        container.widgetSync.start()
         if (savedInstanceState == null) {
             // 알림이 켜져 있으면 다음 시각을 다시 지정한다(시간대가 바뀐 경우 등). 꺼져 있으면 아무것도 하지 않는다
             lifecycleScope.launch { container.notifyScheduler.syncIfEnabled() }

@@ -1,6 +1,7 @@
 package com.kikilog.routinecalendar
 
 import android.content.Context
+import androidx.glance.appwidget.updateAll
 import androidx.work.WorkManager
 import com.kikilog.routinecalendar.data.AppDatabase
 import com.kikilog.routinecalendar.data.CategoryRepository
@@ -11,10 +12,14 @@ import com.kikilog.routinecalendar.data.settingsDataStore
 import com.kikilog.routinecalendar.data.TodayClock
 import com.kikilog.routinecalendar.notify.DailySummarySender
 import com.kikilog.routinecalendar.notify.NotifyScheduler
+import com.kikilog.routinecalendar.widget.TodayWidget
+import com.kikilog.routinecalendar.widget.WidgetRefreshScheduler
+import com.kikilog.routinecalendar.widget.WidgetSync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 
@@ -58,5 +63,23 @@ class AppContainer(context: Context) {
 
     val dailySummarySender: DailySummarySender by lazy {
         DailySummarySender(appContext, routineRepository, settingsRepository, today = todayClock::current)
+    }
+
+    /** 홈 화면 위젯의 자정 갱신 예약 */
+    val widgetRefreshScheduler: WidgetRefreshScheduler by lazy {
+        WidgetRefreshScheduler(workManager = { WorkManager.getInstance(appContext) })
+    }
+
+    /** 앱에서 바꾼 내용을 위젯에 알린다. 보관한 루틴도 포함(보관 · 해제도 위젯을 바꾼다) */
+    val widgetSync: WidgetSync by lazy {
+        WidgetSync(
+            changes = combine(
+                routineRepository.observeRoutines(includeArchived = true),
+                categoryRepository.observeCategories(),
+                todayClock.today,
+            ) { routines, categories, today -> Triple(routines, categories, today) },
+            scope = appScope,
+            update = { TodayWidget().updateAll(appContext) },
+        )
     }
 }
