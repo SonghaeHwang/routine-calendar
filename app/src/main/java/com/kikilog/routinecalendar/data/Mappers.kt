@@ -26,6 +26,7 @@ fun CompletionEntity.toModel(): Completion = Completion(
 fun RoutineWithCompletionsRow.toModel(): RoutineWithCompletions = RoutineWithCompletions(
     routine = routine.toModel(),
     completions = completions.map { it.toModel() }.sortedBy { it.doneOn },
+    createdAt = routine.createdAt,
 )
 
 fun RoutineDraft.toEntity(firstDue: LocalDate, createdAt: Long): RoutineEntity = RoutineEntity(

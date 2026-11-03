@@ -31,6 +31,8 @@ data class EditUiState(
     val firstDue: LocalDate? = null,
     /** 수정 중인 루틴이 보관됐는지(더보기 메뉴 문구에 쓴다) */
     val archived: Boolean = false,
+    /** 등록일. 목록 · 오늘 · 캘린더에는 안 보이고 상세(수정) 화면에만 보인다 */
+    val createdOn: LocalDate? = null,
     /** 보관 · 삭제로 화면을 닫아야 할 때 */
     val closed: Boolean = false,
     /** 등록 화면 위쪽 빠른 선택(설정에서 편집한 목록) */

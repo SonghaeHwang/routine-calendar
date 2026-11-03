@@ -66,6 +66,8 @@ class MappersTest {
             listOf(d("2026-09-01"), d("2026-10-15"), d("2026-11-02")),
             row.toModel().completions.map { it.doneOn },
         )
+        // 등록 시각도 함께 넘긴다(상세 화면의 등록일)
+        assertEquals(1_000L, row.toModel().createdAt)
     }
 
     @Test

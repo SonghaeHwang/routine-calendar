@@ -22,6 +22,14 @@ class PickerDatesTest {
     }
 
     @Test
+    fun `등록 시각은 기기 시간대의 날짜로 - 서울 자정 직후는 UTC 전날`() {
+        // 2026-11-02 00:30 (서울, UTC+9) = 2026-11-01 15:30 UTC
+        val millis = java.time.ZonedDateTime.of(2026, 11, 2, 0, 30, 0, 0, java.time.ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli()
+        assertEquals(LocalDate.parse("2026-11-02"), epochMillisToLocalDate(millis, java.time.ZoneId.of("Asia/Seoul")))
+        assertEquals(LocalDate.parse("2026-11-01"), epochMillisToLocalDate(millis, java.time.ZoneOffset.UTC))
+    }
+
+    @Test
     fun `왕복해도 같은 날 - 월말 · 윤일 · 1970 이전`() {
         for (s in listOf("2026-01-31", "2028-02-29", "2026-12-31", "1969-12-31")) {
             val date = LocalDate.parse(s)

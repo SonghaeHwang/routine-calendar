@@ -13,6 +13,7 @@ import com.kikilog.routinecalendar.core.preset.Preset
 import com.kikilog.routinecalendar.core.schedule.initialSchedule
 import com.kikilog.routinecalendar.data.RoutineDraft
 import com.kikilog.routinecalendar.data.RoutineRepository
+import com.kikilog.routinecalendar.ui.format.epochMillisToLocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -54,7 +55,7 @@ class EditRoutineViewModel(
                 _state.update { it.copy(isLoading = false, notFound = true) }
                 return@launch
             }
-            val (routine, completions) = loaded
+            val (routine, completions, createdAt) = loaded
             val hasCompletions = completions.isNotEmpty()
             _state.update {
                 it.copy(
@@ -69,6 +70,7 @@ class EditRoutineViewModel(
                     repeatsLocked = hasCompletions && routine.repeats,
                     firstDue = routine.firstDue,
                     archived = routine.archived,
+                    createdOn = epochMillisToLocalDate(createdAt),
                 )
             }
         }

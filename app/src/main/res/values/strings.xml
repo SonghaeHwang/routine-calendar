@@ -36,6 +36,7 @@
     <string name="edit_routine">루틴 수정</string>
     <string name="edited_message">변경 내용을 저장했어요</string>
     <string name="repeats_locked_hint">이미 한 기록이 있어 바꿀 수 없어요. 한 번만 할 루틴은 새로 등록해 주세요</string>
+    <string name="label_created_on">등록일: %1$s</string>
     <string name="label_first_due">처음 할 날</string>
     <string name="first_due_hint">아직 한 번도 체크하지 않아 이 날이 다음 예정일이에요. 주기를 바꿨다면 함께 고쳐 주세요</string>
     <string name="error_save_failed">저장하지 못했어요. 다시 시도해 주세요</string>

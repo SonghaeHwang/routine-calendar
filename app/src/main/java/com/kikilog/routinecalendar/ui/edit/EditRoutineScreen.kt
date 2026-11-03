@@ -294,6 +294,16 @@ fun EditRoutineScreen(
                 trailingContent = { Switch(checked = state.notify, onCheckedChange = onNotifyChange) },
             )
 
+            // 등록일은 상세(수정) 화면에서만 보인다. 고칠 수 없는 정보다
+            state.createdOn?.let { createdOn ->
+                Text(
+                    text = stringResource(R.string.label_created_on, formatDate(createdOn, state.today)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
+
             Button(
                 onClick = onSave,
                 enabled = !state.isSaving,

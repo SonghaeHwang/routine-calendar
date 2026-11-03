@@ -212,6 +212,8 @@ class EditRoutineViewModelTest {
         assertEquals(IntervalUnit.WEEK, s.unit)
         assertTrue(s.repeats)
         assertTrue(s.hasCompletions)
+        // 등록일은 저장소의 now(1000ms) 를 기기 시간대 날짜로 바꾼 값
+        assertEquals(com.kikilog.routinecalendar.ui.format.epochMillisToLocalDate(1_000L), s.createdOn)
     }
 
     @Test
