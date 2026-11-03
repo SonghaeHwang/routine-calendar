@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 위젯 미리보기 배경. 실제 위젯은 GlanceTheme 의 widgetBackground 를 쓴다 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="?android:attr/colorBackground" />
+    <corners android:radius="16dp" />
+</shape>

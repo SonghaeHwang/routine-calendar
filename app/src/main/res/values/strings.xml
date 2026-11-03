@@ -157,6 +157,20 @@
     <string name="notify_card_enable">켜기</string>
     <string name="notify_card_later">나중에</string>
 
+    <!-- 홈 화면 위젯 -->
+    <string name="widget_label">오늘 루틴</string>
+    <string name="widget_description">오늘 할 루틴과 지난 루틴을 보고 바로 체크해요</string>
+    <string name="widget_left">%1$d개 남음</string>
+    <string name="widget_overdue_short">+%1$d일</string>
+    <string name="widget_empty">오늘 할 루틴이 없어요</string>
+    <string name="widget_no_routines">앱에서 루틴을 등록해 보세요</string>
+    <string name="widget_next">다음: %1$s · %2$s</string>
+    <string name="widget_preview_date">11월 3일 (화)</string>
+    <string name="widget_preview_row1">☐ 각질제거</string>
+    <string name="widget_preview_row1_overdue">3일 지남</string>
+    <string name="widget_preview_row2">☐ 모델링팩</string>
+    <string name="widget_preview_row3">☑ 화장실 청소</string>
+
     <!-- 빠른 선택 편집 -->
     <string name="preset_add">빠른 선택 추가</string>
     <string name="preset_edit">빠른 선택 수정</string>
