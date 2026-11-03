@@ -198,7 +198,7 @@ fun RoutinesScreen(
 }
 
 /**
- * 누르면 수정, 꾹 누르면 선택 모드. 선택 모드에서는 누를 때마다 고르거나 뺀다.
+ * 누르면 루틴 정보, 꾹 누르면 선택 모드. 선택 모드에서는 누를 때마다 고르거나 뺀다.
  * 보관한 루틴은 흐리게 보인다.
  */
 @OptIn(ExperimentalFoundationApi::class)

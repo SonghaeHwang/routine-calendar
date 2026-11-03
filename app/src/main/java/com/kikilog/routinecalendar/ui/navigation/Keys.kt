@@ -28,3 +28,7 @@ data object PresetsKey : NavKey
 /** 설정 · 루틴 편집창 → 분류 편집 */
 @Serializable
 data object CategoriesKey : NavKey
+
+/** 루틴 정보(읽기 전용). 아래 「편집하기」로 수정 화면으로 간다 */
+@Serializable
+data class InfoKey(val routineId: Long) : NavKey

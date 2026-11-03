@@ -28,6 +28,7 @@ import com.kikilog.routinecalendar.ui.calendar.CalendarRoute
 import com.kikilog.routinecalendar.ui.categories.CategoriesRoute
 import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
+import com.kikilog.routinecalendar.ui.info.RoutineInfoRoute
 import com.kikilog.routinecalendar.ui.format.formatDate
 import com.kikilog.routinecalendar.ui.presets.PresetsRoute
 import kotlinx.coroutines.launch
@@ -56,6 +57,8 @@ fun RoutineCalendarRoot(
 
     val openSettings: () -> Unit = { backStack.add(SettingsKey) }
     val openEdit: (Long?) -> Unit = { routineId -> backStack.add(EditKey(routineId)) }
+    // 목록에서 루틴을 열면 정보 화면부터. 고치려면 정보 화면의 「편집하기」
+    val openInfo: (Long) -> Unit = { routineId -> backStack.add(InfoKey(routineId)) }
     val goBack: () -> Unit = { backStack.removeLastOrNull() }
 
     // 등록 후 안내 문구. 등록 화면이 닫힌 뒤 아래 화면 위에 띄운다
@@ -96,13 +99,16 @@ fun RoutineCalendarRoot(
             ),
             entryProvider = entryProvider {
                 entry<TodayKey> {
-                    TodayRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
+                    TodayRoute(onAdd = { openEdit(null) }, onOpen = openInfo, onOpenSettings = openSettings)
                 }
                 entry<CalendarKey> {
-                    CalendarRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
+                    CalendarRoute(onAdd = { openEdit(null) }, onOpen = openInfo, onOpenSettings = openSettings)
                 }
                 entry<RoutinesKey> {
-                    RoutinesRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
+                    RoutinesRoute(onAdd = { openEdit(null) }, onOpen = openInfo, onOpenSettings = openSettings)
+                }
+                entry<InfoKey> { key ->
+                    RoutineInfoRoute(routineId = key.routineId, onBack = goBack, onEdit = { id -> openEdit(id) })
                 }
                 entry<EditKey> { key ->
                     EditRoutineRoute(

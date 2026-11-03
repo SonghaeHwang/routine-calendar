@@ -83,6 +83,15 @@
 
     <!-- 분류 -->
     <string name="categories_edit">분류 편집</string>
+    <string name="routine_info">루틴 정보</string>
+    <string name="info_next_due">다음 예정일</string>
+    <string name="info_upcoming">앞으로 예정일</string>
+    <string name="info_created_on">등록일</string>
+    <string name="info_edit">편집하기</string>
+    <string name="info_yes">반복</string>
+    <string name="info_no">한 번만</string>
+    <string name="info_on">켜짐</string>
+    <string name="info_off">꺼짐</string>
     <string name="categories_edit_hint">분류를 더하거나 이름 · 색을 바꿔요</string>
     <string name="category_add">분류 추가</string>
     <string name="category_edit">분류 수정</string>
