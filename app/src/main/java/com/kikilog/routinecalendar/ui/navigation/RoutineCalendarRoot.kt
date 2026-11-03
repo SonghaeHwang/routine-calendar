@@ -34,8 +34,8 @@ import com.kikilog.routinecalendar.ui.today.TodayRoute
 
 /** 앱의 뼈대: 하단 탭 + 화면 이동. 등록/수정 · 설정 화면에서는 하단 탭을 숨긴다. */
 @Composable
-fun RoutineCalendarRoot() {
-    val backStack = rememberNavBackStack(TodayKey)
+fun RoutineCalendarRoot(startTab: TopLevelTab = DEFAULT_START_TAB) {
+    val backStack = rememberNavBackStack(startTab.key)
     val currentTab = TopLevelTab.entries.firstOrNull { it.key == backStack.lastOrNull() }
 
     val openSettings: () -> Unit = { backStack.add(SettingsKey) }
@@ -58,7 +58,7 @@ fun RoutineCalendarRoot() {
                     TopLevelTab.entries.forEach { tab ->
                         NavigationBarItem(
                             selected = tab == currentTab,
-                            onClick = { backStack.selectTab(tab) },
+                            onClick = { backStack.selectTab(tab, startTab) },
                             icon = { Icon(painterResource(tab.icon), contentDescription = null) },
                             label = { Text(stringResource(tab.label)) },
                         )
@@ -105,8 +105,8 @@ fun RoutineCalendarRoot() {
     }
 }
 
-private fun NavBackStack<NavKey>.selectTab(tab: TopLevelTab) {
-    val target = backStackFor(tab)
+private fun NavBackStack<NavKey>.selectTab(tab: TopLevelTab, startTab: TopLevelTab) {
+    val target = backStackFor(tab, startTab)
     if (toList() == target) return
     clear()
     addAll(target)
