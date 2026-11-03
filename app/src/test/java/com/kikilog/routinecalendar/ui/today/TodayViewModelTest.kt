@@ -1,5 +1,6 @@
 package com.kikilog.routinecalendar.ui.today
 
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.kikilog.routinecalendar.core.model.Category
@@ -8,10 +9,15 @@ import com.kikilog.routinecalendar.core.model.IntervalUnit
 import com.kikilog.routinecalendar.data.AppDatabase
 import com.kikilog.routinecalendar.data.RoutineDraft
 import com.kikilog.routinecalendar.data.RoutineRepository
+import com.kikilog.routinecalendar.data.SettingsRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -22,7 +28,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -30,11 +38,18 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class TodayViewModelTest {
 
+    @get:Rule
+    val folder = TemporaryFolder()
+
     /** 2026-11-02 는 월요일 */
     private val today = MutableStateFlow(LocalDate.parse("2026-11-02"))
     private lateinit var db: AppDatabase
     private lateinit var repository: RoutineRepository
     private lateinit var viewModel: TodayViewModel
+    private lateinit var settings: SettingsRepository
+    private val storeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    /** 예약을 맞춘 횟수. 저장이 끝난 뒤에 불리므로 기다려서 확인한다 */
+    private val syncCalls = Channel<Unit>(Channel.UNLIMITED)
 
     @Before
     fun setUp() {
@@ -43,12 +58,16 @@ class TodayViewModelTest {
             .allowMainThreadQueries()
             .build()
         repository = RoutineRepository(db.routineDao(), today = { today.value }, now = { 1_000L })
-        viewModel = TodayViewModel(repository, today)
+        settings = SettingsRepository(
+            PreferenceDataStoreFactory.create(scope = storeScope, produceFile = { folder.newFile("settings.preferences_pb") }),
+        )
+        viewModel = TodayViewModel(repository, today, settings, syncNotify = { syncCalls.send(Unit) })
     }
 
     @After
     fun tearDown() {
         db.close()
+        storeScope.cancel()
         Dispatchers.resetMain()
     }
 
@@ -116,5 +135,39 @@ class TodayViewModelTest {
         val board = viewModel.state.first { it.today == LocalDate.parse("2026-11-03") }.board
         assertEquals(1, board.overdue.single().overdueDays)
         assertTrue(board.dueToday.isEmpty())
+    }
+
+    // --- 알림 카드 ---
+
+    @Test
+    fun `루틴이 없으면 알림 카드를 보이지 않고, 루틴이 생기면 보인다`() = runTest {
+        assertFalse(viewModel.state.first { !it.isLoading }.showNotifyCard)
+        add("모델링팩", amount = 7)
+        assertTrue(viewModel.state.first { it.hasAnyRoutine }.showNotifyCard)
+    }
+
+    @Test
+    fun `켜기를 허용하면 알림이 켜지고 예약하고 카드가 사라진다`() = runTest {
+        add("모델링팩", amount = 7)
+        viewModel.state.first { it.showNotifyCard }
+
+        viewModel.onNotifyPermissionResult(granted = true)
+
+        syncCalls.receive()
+        viewModel.state.first { it.hasAnyRoutine && !it.showNotifyCard }
+        assertTrue(settings.notifyEnabled.first())
+    }
+
+    @Test
+    fun `권한을 거절하거나 나중에를 누르면 카드만 닫히고 알림은 꺼진 채`() = runTest {
+        add("모델링팩", amount = 7)
+        viewModel.state.first { it.showNotifyCard }
+
+        viewModel.onNotifyPermissionResult(granted = false)
+
+        viewModel.state.first { it.hasAnyRoutine && !it.showNotifyCard }
+        assertFalse(settings.notifyEnabled.first())
+        assertTrue(settings.notifyCardDismissed.first())
+        assertTrue(syncCalls.tryReceive().isFailure)
     }
 }

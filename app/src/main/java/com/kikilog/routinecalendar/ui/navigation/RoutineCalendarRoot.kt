@@ -11,6 +11,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -33,10 +34,23 @@ import com.kikilog.routinecalendar.ui.routines.RoutinesRoute
 import com.kikilog.routinecalendar.ui.settings.SettingsScreen
 import com.kikilog.routinecalendar.ui.today.TodayRoute
 
-/** 앱의 뼈대: 하단 탭 + 화면 이동. 등록/수정 · 설정 화면에서는 하단 탭을 숨긴다. */
+/**
+ * 앱의 뼈대: 하단 탭 + 화면 이동. 등록/수정 · 설정 화면에서는 하단 탭을 숨긴다.
+ * [openTab] 이 오면(알림을 눌러 열었을 때) 그 탭으로 바꾼 뒤 [onOpenTabHandled] 를 부른다.
+ */
 @Composable
-fun RoutineCalendarRoot(startTab: TopLevelTab = DEFAULT_START_TAB) {
+fun RoutineCalendarRoot(
+    startTab: TopLevelTab = DEFAULT_START_TAB,
+    openTab: TopLevelTab? = null,
+    onOpenTabHandled: () -> Unit = {},
+) {
     val backStack = rememberNavBackStack(startTab.key)
+    LaunchedEffect(openTab) {
+        if (openTab != null) {
+            backStack.selectTab(openTab, startTab)
+            onOpenTabHandled()
+        }
+    }
     val currentTab = TopLevelTab.entries.firstOrNull { it.key == backStack.lastOrNull() }
 
     val openSettings: () -> Unit = { backStack.add(SettingsKey) }

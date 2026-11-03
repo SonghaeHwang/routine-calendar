@@ -13,7 +13,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +37,8 @@ import com.kikilog.routinecalendar.core.schedule.TodayEntry
 import com.kikilog.routinecalendar.ui.common.AddRoutineButton
 import com.kikilog.routinecalendar.ui.common.EmptyState
 import com.kikilog.routinecalendar.ui.common.TabScaffold
+import com.kikilog.routinecalendar.ui.common.rememberNotificationEnabler
+import com.kikilog.routinecalendar.ui.format.notifyTimeLabel
 import com.kikilog.routinecalendar.ui.format.formatDate
 import com.kikilog.routinecalendar.ui.format.formatShortDate
 import com.kikilog.routinecalendar.ui.format.overdueLabel
@@ -42,7 +48,16 @@ import kotlinx.datetime.LocalDate
 fun TodayRoute(onAdd: () -> Unit, onOpen: (Long) -> Unit, onOpenSettings: () -> Unit) {
     val viewModel: TodayViewModel = viewModel(factory = TodayViewModel.Factory)
     val state by viewModel.state.collectAsStateWithLifecycle()
-    TodayScreen(state = state, onToggle = viewModel::onToggle, onOpen = onOpen, onAdd = onAdd, onOpenSettings = onOpenSettings)
+    val requestNotify = rememberNotificationEnabler(viewModel::onNotifyPermissionResult)
+    TodayScreen(
+        state = state,
+        onToggle = viewModel::onToggle,
+        onOpen = onOpen,
+        onAdd = onAdd,
+        onOpenSettings = onOpenSettings,
+        onEnableNotify = requestNotify,
+        onDismissNotifyCard = viewModel::onDismissNotifyCard,
+    )
 }
 
 @Composable
@@ -52,6 +67,8 @@ fun TodayScreen(
     onOpen: (Long) -> Unit,
     onAdd: () -> Unit,
     onOpenSettings: () -> Unit,
+    onEnableNotify: () -> Unit = {},
+    onDismissNotifyCard: () -> Unit = {},
 ) {
     val today = state.today
     TabScaffold(
@@ -72,9 +89,32 @@ fun TodayScreen(
                     bottom = padding.calculateBottomPadding() + 88.dp,
                 ),
             ) {
+                if (state.showNotifyCard) {
+                    item(key = "notify-card") {
+                        NotifyCard(state, onEnable = onEnableNotify, onLater = onDismissNotifyCard)
+                    }
+                }
                 section(R.string.section_overdue, state.board.overdue, today, onToggle, onOpen)
                 section(R.string.section_today, state.board.dueToday, today, onToggle, onOpen)
                 section(R.string.section_upcoming, state.board.upcoming, today, onToggle, onOpen)
+            }
+        }
+    }
+}
+
+/** 루틴을 등록한 뒤 한 번만 보이는 알림 안내. 처음 켜자마자 권한을 묻지 않기 위해 여기서 묻는다 */
+@Composable
+private fun NotifyCard(state: TodayUiState, onEnable: () -> Unit, onLater: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 4.dp)) {
+            Text(
+                stringResource(R.string.notify_card_body, notifyTimeLabel(state.notifyTime)),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(end = 8.dp),
+            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = onLater) { Text(stringResource(R.string.notify_card_later)) }
+                TextButton(onClick = onEnable) { Text(stringResource(R.string.notify_card_enable)) }
             }
         }
     }
