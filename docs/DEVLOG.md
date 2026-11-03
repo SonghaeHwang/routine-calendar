@@ -66,7 +66,7 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
 
 ### 진행 중
 
-- PLAN 3단계(등록 · 루틴 목록 · 오늘 화면) 준비
+- PLAN 3단계(등록 · 루틴 목록 · 오늘 화면) — 저녁에 1~8번까지 진행, 2026-11-03 절에 이어서 기록
 
 ### 막힌 점
 
@@ -117,3 +117,61 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
 - 정하지 않은 것: 앱 이름 · 아이콘, "주 N회" 지원 여부, Android 자동 백업 사용 여부
 - Android Studio 의 Claude 는 "Claude Code 플러그인(JetBrains)" 이 아니라 Android Studio AI 패널에서 모델로 Claude 를 고른 방식. 안에서는 Claude Agent SDK 로 Claude Code 엔진이 돌고, Android Studio 가 자체 도구(`studio_*`)와 지시문을 얹는다
 - 한국어 언어 팩: AI 도구로는 플러그인 설치 · IDE 언어 변경을 할 수 없어 직접 하기로 함 — Settings → Plugins → Marketplace 에서 "Korean Language Pack / 한국어 언어 팩" 설치 후 재시작(안 바뀌면 Appearance & Behavior → System Settings → Language and Region). Android Studio 는 IntelliJ 보다 플랫폼 버전이 늦어 "Incompatible" 일 수 있고, Android 전용 메뉴는 영어로 남을 수 있다
+
+---
+
+## 2026-11-03 (화)
+
+### 한 일
+
+- **PLAN 3단계 — 등록 · 루틴 목록 · 오늘 화면** (11-02 저녁 시작)
+  - 계획: Plan 에이전트로 세부 계획 → PLAN 3단계에 요약. 정한 것 4가지는 예시 화면(글자 그림)을 보고 고름 — 선택 창의 미리보기가 Android Studio 패널에서 안 보여 대화로 다시 보여 줌
+  - ① 기본 의존성 올림(activity 1.13 · lifecycle 2.11 · core-ktx 1.19 · Compose BOM 2026.09) ② Navigation 3 1.2.0 · lifecycle-viewmodel-navigation3 · kotlinx-serialization 1.9.0(Kotlin 2.2.10 과 맞는 판) ③ `:core` 오늘 화면 분류 `buildTodayBoard` · `weekEndOf` · `lastDoneOn` ④ 기본 프리셋 14개 ⑤ 오늘 날짜 흐름 `TodayClock`(자정 갱신 + 화면이 다시 보일 때 새로 읽기) ⑥ 날짜 · 주기 표시 형식과 한국어 문자열 ⑦ 하단 탭 뼈대(휴대폰 확인 ① 통과) ⑧ 등록 화면과 프리셋 ⑨ 루틴 목록 ⑩ 오늘 화면과 체크 ⑪ 수정 시 처음 할 날 변경(저장소) ⑫ 수정 화면 ⑬ 보관 · 삭제 · 보관함
+  - 휴대폰에서 써 보며 바꾼 것(사용자 요청 · 발견)
+    - 오늘 화면 아래 칸을 "이번 주(일~토)" → "다가오는 7일", 저장하면 「○○ 등록했어요 · 다음: 날짜」 안내 (아래 막힌 점)
+    - 첫 화면을 캘린더 탭으로. 뒤로 가기 기준도 첫 화면. 첫 화면 고르기 설정은 4단계로 기록
+    - 빠른 선택 편집: preset 테이블(DB 버전 2, 자동 마이그레이션 뒤 기본 14개 채움), 설정 → 빠른 선택 편집(고치기 · 추가 · 삭제 · 기본값 되돌리기). 휴대폰 업데이트 뒤 기존 루틴이 그대로 남는 것까지 확인
+    - 오늘 화면 줄을 꼭 누르면 수정 화면, 수정(상세) 화면에 등록일(이미 저장 중이던 created_at)
+    - 같은 이름 루틴: 이름 칸 안내 + 등록 시 확인 창 [기존 루틴 열기 · 그래도 추가 · 취소]
+    - 루틴 목록 선택 모드: 꼭 누르면 선택, 위쪽 바에 선택 삭제 · 전체 삭제(확인 창), 더보기에 선택 보관
+    - 나중에 할 것으로 기록: 분류별로 보기(8단계), 첫 화면 고르기(4단계)
+  - 14번(Compose 화면 시험)은 건너뜀: ViewModel 시험(Robolectric + 메모리 DB)과 실기기 확인으로 충분하다고 판단
+  - 시험: `:core` · `:app` 모두 통과. 주요 시험 — TodayBoardTest 14 · EditRoutineViewModelTest 24 · TodayViewModelTest 5 · RoutinesViewModelTest 5 · PresetRepositoryTest 7 · DatabaseMigrationTest 2 · PresetsViewModelTest 5 · PresetFormTest 4
+  - 기기에 설치하는 방법을 `adb` 셸 명령에서 Android Studio 배포 도구로 바꿈(승인 창 없이 설치 · 실행)
+
+### 진행 중
+
+- PLAN 3단계 완료 기준: 실제 루틴 5개 이상으로 사흘 써 보기(11-03 시작). 끝나면 3단계 체크
+- 보류: 오늘 화면에서 체크한 줄을 원래 칸(지난 것 · 다가오는 7일)에 남길지 — 요청 후 "변경하지 말 것" 으로 보류. 지금은 체크하면 "오늘" 칸에 체크된 채로 남는다
+
+### 막힌 점
+
+- **등록한 루틴이 오늘 화면에 안 보여 등록이 안 된 것처럼 보임**
+  - 증상: 화요일에 「젤팩 · 어제 함 · 1주마다」를 저장해도 오늘 화면 어디에도 없음. 여러 번 다시 시도해 젤팩이 세 개 생김. Logcat 에 오류 없음
+  - 원인: 다음 예정일(다음 주 월요일)이 "이번 주(일~토)" 밖이라 어느 칸에도 안 들어감. 저장 후 안내도 없었음. 코드 오류가 아니라 화면 설계 문제
+  - 해결: 아래 칸을 "다가오는 7일" 로, 저장 후 안내 추가. 나중에 같은 이름 확인 창도 넣음
+- **`gradlew` 를 혼자 실행하면 Java 를 못 찾음**
+  - 증상: `ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.`
+  - 원인: 확인 창을 줄이려고 `$env:JAVA_HOME=...;` 를 붙이지 않게 되자, 이 PC 에 JAVA_HOME 이 없다는 게 드러남
+  - 해결: Windows 사용자 환경 변수 JAVA_HOME 을 Android Studio JBR 로 설정하고 Android Studio 재시작
+- **빌드가 겨쳐 실패**
+  - 증상: `NoSuchFileException: ...mergeExtDexDebug\classes2.dex` / `Unable to delete directory '...compileDebugUnitTestKotlin\cacheable' ... a process has files open`
+  - 원인: 시간 초과로 보인 빌드가 실제로는 돌고 있었는데, 그사이 IDE 빌드 도구로 두 번 더 실행해 세 빌드가 같은 `app/build` 를 동시에 씀
+  - 해결: 빌드는 하나만 돌리고 끝날 때까지 기다린다
+- **커밋 메시지의 `\"` 때문에 커밋 명령이 깨짐**
+  - 증상: 본문에 큰따옴표를 넣은 `git commit -m …` 가 시간 초과, 실행 목록에도 없고 커밋도 안 됨
+  - 원인: PowerShell 에서 `\"` 는 이스케이프가 아니라 문자열을 끝낸다. 명령이 깨져 허용 목록 밖 명령이 됨
+  - 해결: `-m '…'` 작은따옴표, 메시지 안에 큰따옴표 · 달러 · 백틱 금지(인용은 「」). CLAUDE.md 커밋 규칙에 추가
+- **환경 변수 하나 없이 여러 명령을 묶으면 확인 창이 뜨는 문제**
+  - 원인: 허용 목록에 있는 단순한 명령도 `$변수=` · `if` · `;` 로 잇으면 통째로 새 명령이 됨
+  - 해결: CLAUDE.md 에 따라 `gradlew` 와 git 명령을 하나씩 따로 실행 → 그 뒤 확인 창 없이 실행됨
+- **사소한 것**
+  - Navigation 3: `backStack.add(...)` 가 Boolean 을 돌려줘 `() -> Unit` 자리에 넘기면 `Argument type mismatch: actual type is 'Function0<Boolean>'` → 반환 타입을 명시
+  - 자리 화면을 지우기 전에 문자열을 먼저 지워 `Unresolved reference 'edit_placeholder'` → 자리 화면 파일을 `git rm`
+  - `LocalContext.current` 로 문자열을 읽으면 Lint 오류(설정 변경에 둔감) → `stringResource` 로 틀을 미리 읽어 `format`
+
+### 메모
+
+- 휴대폰 화면을 캡처할 때 알림창이 내려와 있으면 알림 내용이 찍힌다. 캡처 전에 미리 알리고, 찍힌 내용은 기록하지 않는다
+- 탭 역할: 캘린더(첫 화면, 4단계에서 내용) · 오늘(지금 할 일을 체크하는 화면) · 루틴(등록한 루틴 전체를 관리하는 화면)
+- 일하는 방식: 단계마다 시험 → 커밋 → 푸시를 묻지 않고 이어서 진행, 휴대폰이 필요할 때만 멈춤
