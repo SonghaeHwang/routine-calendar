@@ -49,8 +49,7 @@ import com.kikilog.routinecalendar.ui.format.notifyTimeLabel
 import kotlinx.datetime.DayOfWeek
 
 /**
- * 설정 화면: 알림 · 주 시작 요일 · 첫 화면 · 빠른 선택 편집 · 개인정보 안내 · 앱 버전.
- * 백업은 7단계에서 추가한다(동작하지 않는 메뉴는 보이지 않는다).
+ * 설정 화면: 알림 · 주 시작 요일 · 첫 화면 · 분류 · 빠른 선택 편집 · 백업 · 개인정보 안내 · 앱 버전.
  */
 @Composable
 fun SettingsScreen(
@@ -118,6 +117,8 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.settings_presets)) },
                 supportingContent = { Text(stringResource(R.string.settings_presets_hint)) },
             )
+            HorizontalDivider()
+            BackupSection()
             HorizontalDivider()
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_privacy_title)) },

@@ -126,7 +126,7 @@
 
     <!-- 설정 -->
     <string name="settings_privacy_title">개인정보</string>
-    <string name="settings_privacy_body">모든 기록은 이 휴대폰에만 저장돼요. 인터넷 연결 · 수집 · 공유가 없어요.</string>
+    <string name="settings_privacy_body">모든 기록은 이 휴대폰에 저장돼요. 앱은 인터넷에 연결하지 않고 아무것도 수집 · 공유하지 않아요. 휴대폰의 Google 백업을 켜 두면 내 Google 계정에 암호화되어 저장될 수 있고, 개발자는 그 내용을 볼 수 없어요.</string>
     <string name="settings_version">앱 버전</string>
     <string name="settings_presets">빠른 선택 편집</string>
     <string name="settings_presets_hint">루틴 등록 화면 위쪽의 빠른 선택 목록을 고쳐요</string>
@@ -156,6 +156,32 @@
     <string name="notify_card_body">매일 %1$s에 오늘 할 루틴을 알려 드릴까요?</string>
     <string name="notify_card_enable">켜기</string>
     <string name="notify_card_later">나중에</string>
+
+    <!-- 백업 -->
+    <string name="backup_export">백업 파일로 내보내기</string>
+    <string name="backup_export_hint">루틴 · 기록 · 분류 · 빠른 선택 · 설정을 파일 하나로 저장해요. 새 휴대폰으로 옮길 때 써요</string>
+    <string name="backup_import">백업 파일 가져오기</string>
+    <string name="backup_import_hint">내보낸 파일에서 루틴과 기록을 불러와요</string>
+    <string name="backup_restore">가져오기 전으로 되돌리기</string>
+    <string name="backup_restore_hint">마지막으로 가져오기 직전 상태로 돌아가요</string>
+    <string name="backup_import_title">백업 파일을 가져올까요?</string>
+    <string name="backup_import_body">루틴 %1$d개 · 기록 %2$d개가 들어 있어요.\n\n합치기: 지금 루틴은 그대로 두고 더해요. 같은 이름의 루틴은 기록만 합쳐요.\n덮어쓰기: 지금 루틴 · 기록 · 분류 · 빠른 선택 · 설정을 모두 파일 내용으로 바꿔요.\n\n가져오기 직전 상태는 저장해 두어 되돌릴 수 있어요.</string>
+    <string name="backup_merge">합치기</string>
+    <string name="backup_replace">덮어쓰기</string>
+    <string name="backup_restore_title">가져오기 전으로 되돌릴까요?</string>
+    <string name="backup_restore_body">지금 루틴 · 기록 · 분류 · 빠른 선택 · 설정이 마지막 가져오기 직전 상태로 바뀌어요.</string>
+    <string name="backup_restore_confirm">되돌리기</string>
+    <string name="backup_exported">백업 파일을 저장했어요</string>
+    <string name="backup_export_failed">파일을 저장하지 못했어요. 다른 위치를 골라 주세요</string>
+    <string name="backup_merged">루틴 %1$d개 · 기록 %2$d개를 더했어요</string>
+    <string name="backup_replaced">루틴 %1$d개 · 기록 %2$d개로 바꿨어요</string>
+    <string name="backup_not_backup">이 앱의 백업 파일이 아니거나 파일이 손상됐어요</string>
+    <string name="backup_newer">더 새 버전의 앱에서 만든 파일이에요. 앱을 업데이트한 뒤 가져와 주세요</string>
+    <string name="backup_too_large">파일이 너무 커요. 이 앱의 백업 파일이 맞는지 확인해 주세요</string>
+    <string name="backup_read_failed">파일을 열지 못했어요</string>
+    <string name="backup_import_failed">가져오지 못했어요. 지금 데이터는 바뀌지 않았어요</string>
+    <string name="backup_restored">가져오기 전으로 되돌렸어요</string>
+    <string name="backup_restore_failed">되돌리지 못했어요</string>
 
     <!-- 홈 화면 위젯 -->
     <string name="widget_label">오늘 루틴</string>
