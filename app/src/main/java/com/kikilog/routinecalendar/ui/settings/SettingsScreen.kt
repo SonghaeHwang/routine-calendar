@@ -56,6 +56,7 @@ import kotlinx.datetime.DayOfWeek
 fun SettingsScreen(
     onBack: () -> Unit,
     onOpenPresets: () -> Unit,
+    onOpenCategories: () -> Unit,
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -105,6 +106,12 @@ fun SettingsScreen(
                 }
                 HorizontalDivider()
             }
+            ListItem(
+                modifier = Modifier.clickable(onClick = onOpenCategories),
+                headlineContent = { Text(stringResource(R.string.categories_edit)) },
+                supportingContent = { Text(stringResource(R.string.categories_edit_hint)) },
+            )
+            HorizontalDivider()
             ListItem(
                 modifier = Modifier.clickable(onClick = onOpenPresets),
                 headlineContent = { Text(stringResource(R.string.settings_presets)) },

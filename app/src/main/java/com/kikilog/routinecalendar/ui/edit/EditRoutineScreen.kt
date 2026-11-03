@@ -81,6 +81,7 @@ fun EditRoutineRoute(
     onAdded: (title: String, nextDue: LocalDate, today: LocalDate) -> Unit,
     onEdited: () -> Unit,
     onOpenExisting: (Long) -> Unit,
+    onOpenCategories: () -> Unit = {},
 ) {
     val viewModel: EditRoutineViewModel = viewModel(factory = EditRoutineViewModel.factory(routineId))
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -120,6 +121,7 @@ fun EditRoutineRoute(
         onAddAnyway = viewModel::onAddAnyway,
         onOpenExistingDuplicate = viewModel::onOpenExisting,
         onDismissDuplicate = viewModel::onDismissDuplicate,
+        onOpenCategories = onOpenCategories,
     )
 }
 
@@ -143,6 +145,7 @@ fun EditRoutineScreen(
     onAddAnyway: () -> Unit,
     onOpenExistingDuplicate: () -> Unit,
     onDismissDuplicate: () -> Unit,
+    onOpenCategories: () -> Unit = {},
 ) {
     var menuOpen by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
@@ -249,6 +252,7 @@ fun EditRoutineScreen(
                     categories = state.categories,
                     selectedId = state.categoryId,
                     onSelect = onCategoryChange,
+                    onEdit = onOpenCategories,
                 )
             }
 

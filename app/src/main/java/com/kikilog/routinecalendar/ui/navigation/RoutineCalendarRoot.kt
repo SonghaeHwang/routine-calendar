@@ -25,6 +25,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.kikilog.routinecalendar.ui.calendar.CalendarRoute
+import com.kikilog.routinecalendar.ui.categories.CategoriesRoute
 import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
 import com.kikilog.routinecalendar.ui.format.formatDate
@@ -121,10 +122,18 @@ fun RoutineCalendarRoot(
                             goBack()
                             openEdit(id)
                         },
+                        onOpenCategories = { backStack.add(CategoriesKey) },
                     )
                 }
-                entry<SettingsKey> { SettingsScreen(onBack = goBack, onOpenPresets = { backStack.add(PresetsKey) }) }
+                entry<SettingsKey> {
+                    SettingsScreen(
+                        onBack = goBack,
+                        onOpenPresets = { backStack.add(PresetsKey) },
+                        onOpenCategories = { backStack.add(CategoriesKey) },
+                    )
+                }
                 entry<PresetsKey> { PresetsRoute(onBack = goBack) }
+                entry<CategoriesKey> { CategoriesRoute(onBack = goBack) }
             },
         )
     }

@@ -24,3 +24,7 @@ data object SettingsKey : NavKey
 /** 설정 → 빠른 선택 편집 */
 @Serializable
 data object PresetsKey : NavKey
+
+/** 설정 · 루틴 편집창 → 분류 편집 */
+@Serializable
+data object CategoriesKey : NavKey
