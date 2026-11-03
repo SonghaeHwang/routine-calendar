@@ -22,10 +22,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
@@ -52,9 +49,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.core.model.Category
 import com.kikilog.routinecalendar.core.model.IntervalUnit
-import com.kikilog.routinecalendar.core.preset.DEFAULT_PRESETS
 import com.kikilog.routinecalendar.core.preset.Preset
+import com.kikilog.routinecalendar.ui.common.ChoiceRow
 import com.kikilog.routinecalendar.ui.common.ConfirmDeleteDialog
+import com.kikilog.routinecalendar.ui.common.unitLabel
 import com.kikilog.routinecalendar.ui.common.RoutineActionsMenu
 import com.kikilog.routinecalendar.ui.common.SubScaffold
 import androidx.compose.foundation.layout.Box
@@ -184,8 +182,8 @@ fun EditRoutineScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            if (!state.isEdit) {
-                PresetSection(onPreset)
+            if (!state.isEdit && state.presets.isNotEmpty()) {
+                PresetSection(state.presets, onPreset)
                 HorizontalDivider()
             }
 
@@ -309,16 +307,16 @@ fun EditRoutineScreen(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PresetSection(onPreset: (Preset) -> Unit) {
+private fun PresetSection(presets: List<Preset>, onPreset: (Preset) -> Unit) {
     Section(stringResource(R.string.label_presets)) {
-        DEFAULT_PRESETS.groupBy { it.category }.forEach { (category, presets) ->
+        presets.groupBy { it.category }.forEach { (category, group) ->
             Text(
                 text = categoryLabel(category),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                presets.forEach { preset ->
+                group.forEach { preset ->
                     SuggestionChip(onClick = { onPreset(preset) }, label = { Text(preset.title) })
                 }
             }
@@ -397,33 +395,3 @@ private fun Section(title: String, content: @Composable () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun <T> ChoiceRow(
-    options: List<T>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    label: @Composable (T) -> String,
-    modifier: Modifier = Modifier.fillMaxWidth(),
-) {
-    SingleChoiceSegmentedButtonRow(modifier = modifier) {
-        options.forEachIndexed { index, option ->
-            SegmentedButton(
-                selected = option == selected,
-                onClick = { onSelect(option) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-            ) {
-                Text(label(option))
-            }
-        }
-    }
-}
-
-@Composable
-private fun unitLabel(unit: IntervalUnit): String = stringResource(
-    when (unit) {
-        IntervalUnit.DAY -> R.string.unit_day
-        IntervalUnit.WEEK -> R.string.unit_week
-        IntervalUnit.MONTH -> R.string.unit_month
-    },
-)

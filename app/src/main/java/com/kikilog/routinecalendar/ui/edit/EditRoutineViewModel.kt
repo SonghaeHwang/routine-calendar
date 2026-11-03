@@ -8,11 +8,14 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kikilog.routinecalendar.RoutineCalendarApp
 import com.kikilog.routinecalendar.core.model.Category
 import com.kikilog.routinecalendar.core.model.IntervalUnit
+import com.kikilog.routinecalendar.core.preset.DEFAULT_PRESETS
 import com.kikilog.routinecalendar.core.preset.Preset
 import com.kikilog.routinecalendar.core.schedule.initialSchedule
 import com.kikilog.routinecalendar.data.RoutineDraft
 import com.kikilog.routinecalendar.data.RoutineRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -28,6 +31,7 @@ class EditRoutineViewModel(
     private val repository: RoutineRepository,
     today: () -> LocalDate,
     routineId: Long? = null,
+    presets: Flow<List<Preset>> = flowOf(DEFAULT_PRESETS),
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -37,6 +41,10 @@ class EditRoutineViewModel(
 
     init {
         if (routineId != null) load(routineId)
+        // 빠른 선택은 등록할 때만 쓴다. 설정에서 바꾸면 바로 반영된다
+        if (routineId == null) {
+            viewModelScope.launch { presets.collect { list -> _state.update { it.copy(presets = list) } } }
+        }
     }
 
     private fun load(id: Long) {
@@ -159,7 +167,12 @@ class EditRoutineViewModel(
         fun factory(routineId: Long?): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as RoutineCalendarApp).container
-                EditRoutineViewModel(container.routineRepository, container.todayClock::current, routineId)
+                EditRoutineViewModel(
+                    repository = container.routineRepository,
+                    today = container.todayClock::current,
+                    routineId = routineId,
+                    presets = container.presetRepository.observePresets(),
+                )
             }
         }
     }

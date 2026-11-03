@@ -20,3 +20,7 @@ data class EditKey(val routineId: Long? = null) : NavKey
 
 @Serializable
 data object SettingsKey : NavKey
+
+/** 설정 → 빠른 선택 편집 */
+@Serializable
+data object PresetsKey : NavKey

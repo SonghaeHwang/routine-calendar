@@ -88,4 +88,17 @@
     <string name="settings_privacy_title">개인정보</string>
     <string name="settings_privacy_body">모든 기록은 이 휴대폰에만 저장돼요. 인터넷 연결 · 수집 · 공유가 없어요.</string>
     <string name="settings_version">앱 버전</string>
+    <string name="settings_presets">빠른 선택 편집</string>
+    <string name="settings_presets_hint">루틴 등록 화면 위쪽의 빠른 선택 목록을 고쳐요</string>
+
+    <!-- 빠른 선택 편집 -->
+    <string name="preset_add">빠른 선택 추가</string>
+    <string name="preset_edit">빠른 선택 수정</string>
+    <string name="preset_custom_interval">주기는 등록할 때 직접 입력</string>
+    <string name="preset_amount_hint">주기 숫자를 비우면 등록할 때 직접 입력해요</string>
+    <string name="presets_empty">빠른 선택이 없어요.\n오른쪽 위 + 로 추가하거나 ⋮ 에서 기본값으로 되돌릴 수 있어요</string>
+    <string name="presets_reset">기본값으로 되돌리기</string>
+    <string name="presets_reset_title">기본값으로 되돌릴까요?</string>
+    <string name="presets_reset_body">추가하거나 고친 빠른 선택이 사라지고 처음 14개로 돌아가요. 등록한 루틴은 그대로예요.</string>
+    <string name="presets_reset_confirm">되돌리기</string>
 </resources>

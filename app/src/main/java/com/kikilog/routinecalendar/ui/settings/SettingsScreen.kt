@@ -1,5 +1,6 @@
 package com.kikilog.routinecalendar.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,11 +18,11 @@ import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.ui.common.SubScaffold
 
 /**
- * 설정 화면. 3단계에서는 개인정보 안내와 앱 버전만 둔다.
+ * 설정 화면. 3단계에서는 빠른 선택 편집 · 개인정보 안내 · 앱 버전만 둔다.
  * 알림 시각 · 주 시작 요일 · 백업은 각 단계에서 추가한다(동작하지 않는 메뉴는 보이지 않는다).
  */
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, onOpenPresets: () -> Unit) {
     val context = LocalContext.current
     // AGP 9 는 BuildConfig 를 기본으로 만들지 않아 패키지 정보에서 읽는다
     val versionName = remember(context) {
@@ -35,6 +36,12 @@ fun SettingsScreen(onBack: () -> Unit) {
                 .padding(padding)
                 .verticalScroll(rememberScrollState()),
         ) {
+            ListItem(
+                modifier = Modifier.clickable(onClick = onOpenPresets),
+                headlineContent = { Text(stringResource(R.string.settings_presets)) },
+                supportingContent = { Text(stringResource(R.string.settings_presets_hint)) },
+            )
+            HorizontalDivider()
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_privacy_title)) },
                 supportingContent = { Text(stringResource(R.string.settings_privacy_body)) },

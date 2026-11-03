@@ -70,6 +70,17 @@ class EditRoutineViewModelTest {
     }
 
     @Test
+    fun `등록 화면은 받은 빠른 선택 목록을 쓰고, 바뀌면 바로 반영한다`() {
+        val presets = kotlinx.coroutines.flow.MutableStateFlow(DEFAULT_PRESETS.take(2))
+        val vm = EditRoutineViewModel(repository, today = { today }, presets = presets)
+        assertEquals(DEFAULT_PRESETS.take(2), vm.state.value.presets)
+
+        val mine = com.kikilog.routinecalendar.core.preset.Preset("손톱 정리", Category.BEAUTY, null, id = 99)
+        presets.value = listOf(mine)
+        assertEquals(listOf(mine), vm.state.value.presets)
+    }
+
+    @Test
     fun `프리셋을 고르면 칸이 채워진다`() {
         viewModel.applyPreset(preset("이불 세탁"))
 

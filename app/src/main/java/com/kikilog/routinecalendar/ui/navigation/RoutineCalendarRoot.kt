@@ -27,6 +27,7 @@ import com.kikilog.routinecalendar.ui.calendar.CalendarPlaceholder
 import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
 import com.kikilog.routinecalendar.ui.format.formatDate
+import com.kikilog.routinecalendar.ui.presets.PresetsRoute
 import kotlinx.coroutines.launch
 import com.kikilog.routinecalendar.ui.routines.RoutinesRoute
 import com.kikilog.routinecalendar.ui.settings.SettingsScreen
@@ -99,7 +100,8 @@ fun RoutineCalendarRoot(startTab: TopLevelTab = DEFAULT_START_TAB) {
                         },
                     )
                 }
-                entry<SettingsKey> { SettingsScreen(onBack = { goBack() }) }
+                entry<SettingsKey> { SettingsScreen(onBack = goBack, onOpenPresets = { backStack.add(PresetsKey) }) }
+                entry<PresetsKey> { PresetsRoute(onBack = goBack) }
             },
         )
     }

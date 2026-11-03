@@ -3,6 +3,7 @@ package com.kikilog.routinecalendar.ui.edit
 import com.kikilog.routinecalendar.core.model.Category
 import com.kikilog.routinecalendar.core.model.Interval
 import com.kikilog.routinecalendar.core.model.IntervalUnit
+import com.kikilog.routinecalendar.core.preset.Preset
 import kotlinx.datetime.LocalDate
 
 enum class TitleError { EMPTY }
@@ -32,6 +33,8 @@ data class EditUiState(
     val archived: Boolean = false,
     /** 보관 · 삭제로 화면을 닫아야 할 때 */
     val closed: Boolean = false,
+    /** 등록 화면 위쪽 빠른 선택(설정에서 편집한 목록) */
+    val presets: List<Preset> = emptyList(),
     val title: String = "",
     val category: Category = Category.HOUSE,
     val amountText: String = "1",
