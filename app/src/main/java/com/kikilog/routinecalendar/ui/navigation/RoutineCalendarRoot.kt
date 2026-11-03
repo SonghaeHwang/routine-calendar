@@ -24,7 +24,7 @@ import com.kikilog.routinecalendar.ui.edit.EditRoutinePlaceholder
 import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
 import com.kikilog.routinecalendar.ui.routines.RoutinesRoute
 import com.kikilog.routinecalendar.ui.settings.SettingsScreen
-import com.kikilog.routinecalendar.ui.today.TodayPlaceholder
+import com.kikilog.routinecalendar.ui.today.TodayRoute
 
 /** 앱의 뼈대: 하단 탭 + 화면 이동. 등록/수정 · 설정 화면에서는 하단 탭을 숨긴다. */
 @Composable
@@ -66,7 +66,7 @@ fun RoutineCalendarRoot() {
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                entry<TodayKey> { TodayPlaceholder(onAdd = { openEdit(null) }, onOpenSettings = openSettings) }
+                entry<TodayKey> { TodayRoute(onAdd = { openEdit(null) }, onOpenSettings = openSettings) }
                 entry<CalendarKey> { CalendarPlaceholder(onOpenSettings = openSettings) }
                 entry<RoutinesKey> {
                     RoutinesRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
