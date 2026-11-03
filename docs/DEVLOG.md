@@ -138,10 +138,19 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
   - 14번(Compose 화면 시험)은 건너뜀: ViewModel 시험(Robolectric + 메모리 DB)과 실기기 확인으로 충분하다고 판단
   - 시험: `:core` · `:app` 모두 통과. 주요 시험 — TodayBoardTest 14 · EditRoutineViewModelTest 24 · TodayViewModelTest 5 · RoutinesViewModelTest 5 · PresetRepositoryTest 7 · DatabaseMigrationTest 2 · PresetsViewModelTest 5 · PresetFormTest 4
   - 기기에 설치하는 방법을 `adb` 셸 명령에서 Android Studio 배포 도구로 바꿈(승인 창 없이 설치 · 실행)
+- **PLAN 4단계 — 캘린더** (완료)
+  - 4-1 `:core` 달력 칸(`monthGridDates` · `weekDays`)과 날짜별 예정 · 완료(`buildCalendarDays` · `calendarEntriesOn`)
+  - 4-2 DataStore 설정 저장소(주 시작 요일 · 첫 화면). 첫 화면은 앱을 켤 때 한 번 읽어 그 탭으로 시작
+  - 4-3 캘린더 화면: 월 이동 · 「오늘」 단추 · 칸마다 ● 예정(지난 날은 빨강) · ✓ 완료, 날짜를 누르면 아래에 그날 목록, 오늘까지는 체크 · 해제 가능, 길게 누르면 수정
+  - 4-4 설정 화면에 주 시작 요일(일요일/월요일) · 첫 화면(오늘/캘린더/루틴) 단추 줄
+  - 휴대폰 확인: 월 이동, 11월 3일 예정 4개 · 2일 완료 1개가 오늘 화면과 같음, 월요일로 바꾸면 캘린더가 월~일로 바로 바뀜(확인 뒤 일요일로 되돌림)
+  - 커밋 전마다 규칙 검사(rule-checker 지시문을 일반 에이전트에 넘겨 실행) — 모두 통과, 새 의존성 · 권한 없음
+  - 시험: `:app` 120개 모두 통과(CalendarViewModelTest 6 · SettingsViewModelTest 3 · SettingsRepositoryTest 3 추가)
 
 ### 진행 중
 
 - PLAN 3단계 완료 기준: 실제 루틴 5개 이상으로 사흘 써 보기(11-03 시작). 끝나면 3단계 체크
+- 다음: PLAN 5단계(알림) 세부 계획
 - 보류: 오늘 화면에서 체크한 줄을 원래 칸(지난 것 · 다가오는 7일)에 남길지 — 요청 후 "변경하지 말 것" 으로 보류. 지금은 체크하면 "오늘" 칸에 체크된 채로 남는다
 
 ### 막힌 점
@@ -169,6 +178,8 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
   - Navigation 3: `backStack.add(...)` 가 Boolean 을 돌려줘 `() -> Unit` 자리에 넘기면 `Argument type mismatch: actual type is 'Function0<Boolean>'` → 반환 타입을 명시
   - 자리 화면을 지우기 전에 문자열을 먼저 지워 `Unresolved reference 'edit_placeholder'` → 자리 화면 파일을 `git rm`
   - `LocalContext.current` 로 문자열을 읽으면 Lint 오류(설정 변경에 둔감) → `stringResource` 로 틀을 미리 읽어 `format`
+  - 규칙 검사 에이전트를 부르면 `Agent type 'rule-checker' not found` → 이 세션에 등록되지 않아서. `.claude/agents/rule-checker.md` 지시문을 일반 에이전트에 넘겨 같은 검사를 돌림
+  - 빌드 파일을 바꾼 뒤 배포하면 `Gradle sync needed for this project.` → Gradle 동기화 후 다시 배포
 
 ### 메모
 
