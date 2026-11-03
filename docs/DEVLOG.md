@@ -168,11 +168,15 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
   - ① Glance 1.2.0(appwidget · material3 · 시험 두 개) ②~⑤ 「오늘 루틴」 위젯: 지난 것 + 오늘, 체크 칸(`ToggleRoutineAction`), 분류 색 점, 비었을 때 다음 예정 하나, Responsive 두 크기, 누르면 달력, 정적 미리보기 ⑥ `WidgetSync`(앱 변경 → `updateAll`) ⑧ 자정 갱신(24시간 주기 + 다음 0시 1분 지정)
   - 시험: WidgetStateTest 5 · TodayWidgetTest 6 · WidgetSyncTest 3 · WidgetRefreshTest 3. 병합 Manifest 권한 변화 없음(`INTERNET` 없음)
   - 사용자 요청으로 위젯 목록 아이콘을 고양이 그림으로. 앱 아이콘도 같은 그림으로 8단계에서 바꿈
+- **PLAN 7단계 — 백업** (코드 완료, 휴대폰 확인 남음)
+  - 합치기 규칙을 물어 정함: 같은 이름 루틴은 기록만 합침 · 되돌리기는 설정의 단추 · 합칠 때 앱 설정 유지
+  - ① kotlinx-serialization-json 1.9.0 ② 형식 · 검사(`decodeBackup`: 새 판 · 손상 · 5MB 초과 거부, 없는 분류는 기타로, 같은 날 기록 하나) ③ `BackupDao`(한 트랜잭션 읽기 · 덮어쓰기 · 합치기) ④ `BackupRepository`(가져오기 전 자동 저장 · 되돌리기) ⑤ 설정 화면 백업 메뉴 ⑥ 자동 백업 XML(DB · DataStore 만, 클라우드는 암호화될 때만) · 개인정보 안내 문구
+  - 시험: BackupFormatTest 10 · BackupRepositoryTest 5 · BackupViewModelTest 4. 저장소 권한 · 네트워크 없음(규칙 검사 통과)
 
 ### 진행 중
 
 - PLAN 6단계 ⑩ 휴대폰 확인: 위젯 놓기 · 크기 · 위젯에서 체크 → 앱 · 앱에서 체크 → 위젯 · 다크 모드 · 앱 종료 뒤 체크 · 자정. 끝나면 6단계 체크
-- PLAN 7단계(백업) 시작 전
+- PLAN 7단계 ⑦ 휴대폰 확인: 내보내기 → 가져오기(합치기 · 덮어쓰기) → 되돌리기, 내 파일 · Google Drive 선택기. ⑧ bmgr 시험은 앱을 지우므로 사용자 확인 뒤(그 전에 JSON 내보내기)
 - 보류: 오늘 화면에서 체크한 줄을 원래 칸(지난 것 · 다가오는 7일)에 남길지 — 요청 후 "변경하지 말 것" 으로 보류. 지금은 체크하면 "오늘" 칸에 체크된 채로 남는다
 
 ### 막힌 점
