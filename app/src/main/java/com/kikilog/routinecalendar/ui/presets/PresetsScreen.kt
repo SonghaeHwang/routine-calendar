@@ -1,6 +1,11 @@
 package com.kikilog.routinecalendar.ui.presets
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,10 +72,14 @@ fun PresetsRoute(onBack: () -> Unit) {
         onSave = viewModel::save,
         onDelete = viewModel::delete,
         onReset = viewModel::resetToDefaults,
+        onMove = viewModel::move,
     )
 }
 
-/** 빠른 선택 편집: 누르면 고치고, 오른쪽 위 + 로 추가, 각 줄의 삭제, ⋮ 로 기본값 되돌리기 */
+/**
+ * 빠른 선택 편집: 누르면 고치고, 오른쪽 위 + 로 추가, 각 줄의 삭제, ⋮ 로 기본값 되돌리기.
+ * 줄을 꾹 눌러 끌어 다른 분류에 놓으면 그 분류로 옮겨진다(대화상자에서 분류를 바꿔도 된다).
+ */
 @Composable
 fun PresetsScreen(
     state: PresetsUiState,
@@ -78,7 +87,11 @@ fun PresetsScreen(
     onSave: (PresetForm) -> Boolean,
     onDelete: (Long) -> Unit,
     onReset: () -> Unit,
+    onMove: (presetId: Long, categoryId: Long) -> Unit = { _, _ -> },
 ) {
+    val listState = rememberLazyListState()
+    val drag = rememberPresetDragState(listState)
+    SideEffect { drag.update(state.presets.associate { it.id to it.categoryId }) }
     // 편집 중인 항목. null 이면 대화상자 닫힘
     var editing by remember { mutableStateOf<PresetForm?>(null) }
     var menuOpen by rememberSaveable { mutableStateOf(false) }
@@ -111,22 +124,47 @@ fun PresetsScreen(
             state.isLoading -> Unit
             state.presets.isEmpty() -> EmptyState(stringResource(R.string.presets_empty), padding)
             else -> LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
             ) {
+                item(key = "hint") {
+                    Text(
+                        stringResource(R.string.presets_drag_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
                 val groups = state.presets.groupBy { it.categoryId }
                 state.categories.forEach { category ->
                     val group = groups[category.id].orEmpty()
-                    item(key = "header-${category.id}") {
-                        CategoryHeader(category)
+                    // 빈 분류도 머리글을 보여 끌어 놓을 자리가 된다
+                    item(key = categoryHeaderKey(category.id)) {
+                        CategoryHeader(
+                            category = category,
+                            highlighted = drag.draggingId != null && drag.targetCategoryId == category.id,
+                        )
                     }
                     items(group, key = { it.id }) { preset ->
-                        PresetRow(
-                            preset = preset,
-                            onClick = { editing = PresetForm.from(preset) },
-                            onDelete = { onDelete(preset.id) },
-                        )
-                        HorizontalDivider()
+                        val dragging = drag.draggingId == preset.id
+                        Column(
+                            modifier = Modifier
+                                .zIndex(if (dragging) 1f else 0f)
+                                .graphicsLayer {
+                                    translationY = if (dragging) drag.offsetY else 0f
+                                    shadowElevation = if (dragging) 12f else 0f
+                                }
+                                .background(MaterialTheme.colorScheme.surface)
+                                .presetDraggable(preset.id, drag, onMove),
+                        ) {
+                            PresetRow(
+                                preset = preset,
+                                onClick = { editing = PresetForm.from(preset) },
+                                onDelete = { onDelete(preset.id) },
+                            )
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
@@ -158,12 +196,13 @@ fun PresetsScreen(
     }
 }
 
-/** 분류 머리글(색 점 + 이름) */
+/** 분류 머리글(색 점 + 이름). 끌어 놓을 분류면 바탕색으로 강조한다 */
 @Composable
-private fun CategoryHeader(category: Category, modifier: Modifier = Modifier) {
+private fun CategoryHeader(category: Category, highlighted: Boolean = false) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
+            .background(if (highlighted) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
             .semantics { heading() },
         verticalAlignment = Alignment.CenterVertically,
