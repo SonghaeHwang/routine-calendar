@@ -23,7 +23,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.kikilog.routinecalendar.ui.calendar.CalendarPlaceholder
+import com.kikilog.routinecalendar.ui.calendar.CalendarRoute
 import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
 import com.kikilog.routinecalendar.ui.format.formatDate
@@ -83,7 +83,9 @@ fun RoutineCalendarRoot(startTab: TopLevelTab = DEFAULT_START_TAB) {
                 entry<TodayKey> {
                     TodayRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
                 }
-                entry<CalendarKey> { CalendarPlaceholder(onOpenSettings = openSettings) }
+                entry<CalendarKey> {
+                    CalendarRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
+                }
                 entry<RoutinesKey> {
                     RoutinesRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
                 }

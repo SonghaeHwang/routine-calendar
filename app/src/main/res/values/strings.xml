@@ -95,8 +95,16 @@
     <string name="interval_once_week">%1$d주 후 한 번</string>
     <string name="interval_once_month">%1$d개월 후 한 번</string>
 
-    <!-- 캘린더 (4단계에서 채움) -->
-    <string name="calendar_placeholder">캘린더는 다음 단계에서 만들어요</string>
+    <!-- 캘린더 -->
+    <string name="calendar_month_title">%1$d년 %2$d월</string>
+    <string name="calendar_prev">이전 달</string>
+    <string name="calendar_next">다음 달</string>
+    <string name="calendar_today">오늘</string>
+    <string name="calendar_day_empty">이날은 예정도 기록도 없어요</string>
+    <string name="calendar_due">예정</string>
+    <string name="calendar_done">완료</string>
+    <string name="calendar_missed">놓침</string>
+    <string name="calendar_cell_desc">%1$s, 예정 %2$d개, 완료 %3$d개</string>
 
     <!-- 설정 -->
     <string name="settings_privacy_title">개인정보</string>
