@@ -65,7 +65,14 @@
     <string name="routine_next_due">다음: %1$s</string>
     <string name="routine_ended">끝남</string>
     <string name="routine_archived">보관됨</string>
-    <string name="routine_menu_label">보관 · 삭제 메뉴 열기</string>
+    <string name="routine_select_label">선택</string>
+    <string name="selection_title">%1$d개 선택</string>
+    <string name="close_selection">선택 끝내기</string>
+    <string name="action_delete_selected">선택 삭제</string>
+    <string name="action_delete_all">전체 삭제</string>
+    <string name="delete_selected_title">선택한 루틴 %1$d개를 삭제할까요?</string>
+    <string name="delete_all_title">목록의 루틴 %1$d개를 모두 삭제할까요?</string>
+    <string name="delete_many_body">완료 기록도 모두 지워지고 되돌릴 수 없어요. 잠시 안 할 루틴이라면 ⋮ 에서 보관을 써 보세요.</string>
     <string name="show_archived">보관한 루틴 보기</string>
     <string name="hide_archived">보관한 루틴 숨기기</string>
     <string name="action_archive">보관</string>

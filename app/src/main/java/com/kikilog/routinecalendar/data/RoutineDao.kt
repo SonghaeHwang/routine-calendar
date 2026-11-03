@@ -60,6 +60,13 @@ abstract class RoutineDao {
     @Query("DELETE FROM routine WHERE id = :id")
     abstract suspend fun deleteRoutine(id: Long): Int
 
+    /** 여러 개를 한 번에(선택 삭제 · 전체 삭제). 완료 기록도 함께 지워진다. */
+    @Query("DELETE FROM routine WHERE id IN (:ids)")
+    abstract suspend fun deleteRoutines(ids: List<Long>): Int
+
+    @Query("UPDATE routine SET archived = :archived WHERE id IN (:ids)")
+    abstract suspend fun setArchived(ids: List<Long>, archived: Boolean): Int
+
     @Query("DELETE FROM completion WHERE routine_id = :routineId AND done_on = :doneOn")
     abstract suspend fun deleteCompletion(routineId: Long, doneOn: LocalDate): Int
 

@@ -29,16 +29,21 @@ fun TabScaffold(
     onOpenSettings: () -> Unit,
     floatingActionButton: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
+    navigationIcon: @Composable () -> Unit = {},
+    showSettings: Boolean = true,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(title) },
+                navigationIcon = navigationIcon,
                 actions = {
                     actions()
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(painterResource(R.drawable.ic_settings), contentDescription = stringResource(R.string.settings))
+                    if (showSettings) {
+                        IconButton(onClick = onOpenSettings) {
+                            Icon(painterResource(R.drawable.ic_settings), contentDescription = stringResource(R.string.settings))
+                        }
                     }
                 },
             )

@@ -60,6 +60,14 @@ class RoutineRepository(
     suspend fun delete(id: Long): Boolean =
         dao.deleteRoutine(id) > 0
 
+    /** 여러 개를 한 번에 지운다(선택 삭제 · 전체 삭제). 지운 개수를 돌려준다 */
+    suspend fun delete(ids: Collection<Long>): Int =
+        if (ids.isEmpty()) 0 else dao.deleteRoutines(ids.toList())
+
+    /** 여러 개를 한 번에 보관 · 보관 해제 */
+    suspend fun setArchived(ids: Collection<Long>, archived: Boolean): Int =
+        if (ids.isEmpty()) 0 else dao.setArchived(ids.toList(), archived)
+
     /**
      * 완료 체크. 새로 기록했으면 true, 그날 이미 있으면 false.
      * @throws IllegalArgumentException [doneOn] 이 오늘보다 늦을 때

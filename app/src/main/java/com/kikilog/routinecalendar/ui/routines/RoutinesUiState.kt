@@ -25,7 +25,11 @@ data class RoutinesUiState(
     val today: LocalDate? = null,
     val rows: List<RoutineRow> = emptyList(),
     val showArchived: Boolean = false,
-)
+    /** 선택 모드에서 고른 루틴. 비어 있으면 선택 모드가 아니다 */
+    val selectedIds: Set<Long> = emptySet(),
+) {
+    val isSelecting: Boolean get() = selectedIds.isNotEmpty()
+}
 
 /** 다음 예정일 순, 끝난 것은 맨 아래. 같으면 이름 · id 순. */
 fun buildRoutineRows(items: List<RoutineWithCompletions>): List<RoutineRow> =
