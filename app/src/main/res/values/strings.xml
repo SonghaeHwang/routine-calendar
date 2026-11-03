@@ -112,6 +112,12 @@
     <string name="settings_version">앱 버전</string>
     <string name="settings_presets">빠른 선택 편집</string>
     <string name="settings_presets_hint">루틴 등록 화면 위쪽의 빠른 선택 목록을 고쳐요</string>
+    <string name="settings_week_start">주 시작 요일</string>
+    <string name="settings_week_start_hint">캘린더 한 줄이 이 요일부터 시작해요</string>
+    <string name="settings_week_sunday">일요일</string>
+    <string name="settings_week_monday">월요일</string>
+    <string name="settings_start_screen">첫 화면</string>
+    <string name="settings_start_screen_hint">다음에 앱을 켤 때 처음 보이는 탭이에요</string>
 
     <!-- 빠른 선택 편집 -->
     <string name="preset_add">빠른 선택 추가</string>
