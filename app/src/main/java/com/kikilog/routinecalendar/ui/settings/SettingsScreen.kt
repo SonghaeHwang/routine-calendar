@@ -98,8 +98,9 @@ fun SettingsScreen(
                     hint = stringResource(R.string.settings_start_screen_hint),
                 ) {
                     ChoiceRow(
-                        options = StartScreen.entries,
-                        selected = state.startScreen,
+                        options = START_SCREEN_OPTIONS,
+                        // 오늘 탭을 숨기기 전에 고른 「오늘」은 달력으로 열리므로 달력으로 보인다
+                        selected = state.startScreen.takeIf { it in START_SCREEN_OPTIONS } ?: StartScreen.CALENDAR,
                         onSelect = viewModel::setStartScreen,
                         label = { startScreenLabel(it) },
                     )

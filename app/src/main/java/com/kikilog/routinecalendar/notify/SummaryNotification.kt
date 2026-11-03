@@ -22,7 +22,7 @@ const val DAILY_SUMMARY_CHANNEL_ID = "daily_summary"
 /** 같은 id 로 덮어써서 요약 알림은 늘 하나만 남는다 */
 const val DAILY_SUMMARY_NOTIFICATION_ID = 1
 
-/** 알림을 눌러 앱을 열 때 MainActivity 에 넘기는 값. 값은 열 탭(TopLevelTab.name) */
+/** 알림을 눌러 앱을 열 때 MainActivity 에 넘기는 값. 값은 열 탭(TopLevelTab.name). 처음 열린 달력은 오늘을 고른 채다 */
 const val EXTRA_OPEN_TAB = "open_tab"
 
 /** 채널을 만든다. 이미 있으면 아무 일도 없다 */
@@ -91,7 +91,7 @@ fun summaryCountText(context: Context, summary: DailySummary): String = listOfNo
 private fun openTodayIntent(context: Context): PendingIntent {
     // 앱 안의 화면 하나로만 가므로 URI 딥 링크 대신 명시 Intent + extra
     val intent = Intent(context, MainActivity::class.java)
-        .putExtra(EXTRA_OPEN_TAB, OPEN_TAB_TODAY)
+        .putExtra(EXTRA_OPEN_TAB, OPEN_TAB_ON_TAP)
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
     return PendingIntent.getActivity(
         context,
@@ -101,4 +101,5 @@ private fun openTodayIntent(context: Context): PendingIntent {
     )
 }
 
-const val OPEN_TAB_TODAY = "TODAY"
+/** 알림을 눌렀을 때 열 탭. 오늘 탭을 숨긴 뒤로는 달력(오늘 날짜가 골라져 있다) */
+const val OPEN_TAB_ON_TAP = "CALENDAR"

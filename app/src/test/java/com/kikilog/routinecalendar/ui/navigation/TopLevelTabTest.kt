@@ -6,7 +6,7 @@ import org.junit.Test
 class TopLevelTabTest {
 
     @Test
-    fun `기본 첫 화면은 캘린더`() {
+    fun `기본 첫 화면은 달력`() {
         assertEquals(TopLevelTab.CALENDAR, DEFAULT_START_TAB)
     }
 
@@ -30,14 +30,22 @@ class TopLevelTabTest {
 
     @Test
     fun `설정의 첫 화면을 탭으로`() {
-        assertEquals(TopLevelTab.TODAY, com.kikilog.routinecalendar.data.StartScreen.TODAY.toTab())
+        // 오늘 탭을 숨긴 뒤로 저장돼 있던 「오늘」은 달력으로 연다
+        assertEquals(TopLevelTab.CALENDAR, com.kikilog.routinecalendar.data.StartScreen.TODAY.toTab())
         assertEquals(TopLevelTab.CALENDAR, com.kikilog.routinecalendar.data.StartScreen.CALENDAR.toTab())
         assertEquals(TopLevelTab.ROUTINES, com.kikilog.routinecalendar.data.StartScreen.ROUTINES.toTab())
         assertEquals(TopLevelTab.CALENDAR, com.kikilog.routinecalendar.data.DEFAULT_START_SCREEN.toTab())
     }
 
     @Test
-    fun `탭은 오늘 · 캘린더 · 루틴 순서`() {
+    fun `하단 탭은 달력 · 루틴 - 오늘 탭은 숨김`() {
+        assertEquals(listOf(CalendarKey, RoutinesKey), VISIBLE_TABS.map { it.key })
+        // 다시 살릴 수 있도록 탭 자체는 남아 있다
         assertEquals(listOf(TodayKey, CalendarKey, RoutinesKey), TopLevelTab.entries.map { it.key })
+    }
+
+    @Test
+    fun `알림을 누르면 달력 탭`() {
+        assertEquals(TopLevelTab.CALENDAR.name, com.kikilog.routinecalendar.notify.OPEN_TAB_ON_TAP)
     }
 }

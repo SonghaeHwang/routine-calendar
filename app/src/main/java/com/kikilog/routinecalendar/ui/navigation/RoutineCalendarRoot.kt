@@ -74,7 +74,7 @@ fun RoutineCalendarRoot(
         bottomBar = {
             if (currentTab != null) {
                 NavigationBar {
-                    TopLevelTab.entries.forEach { tab ->
+                    VISIBLE_TABS.forEach { tab ->
                         NavigationBarItem(
                             selected = tab == currentTab,
                             onClick = { backStack.selectTab(tab, startTab) },

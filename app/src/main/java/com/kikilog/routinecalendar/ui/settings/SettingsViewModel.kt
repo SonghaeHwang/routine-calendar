@@ -22,6 +22,9 @@ import kotlinx.datetime.DayOfWeek
 /** 주 시작 요일로 고를 수 있는 값. 한국 달력에서 쓰는 두 가지만 둔다 */
 val WEEK_START_OPTIONS: List<DayOfWeek> = listOf(DayOfWeek.SUNDAY, DayOfWeek.MONDAY)
 
+/** 첫 화면으로 고를 수 있는 탭. 오늘 탭을 숨긴 동안은 달력 · 루틴만 */
+val START_SCREEN_OPTIONS: List<StartScreen> = listOf(StartScreen.CALENDAR, StartScreen.ROUTINES)
+
 data class SettingsUiState(
     val isLoading: Boolean = true,
     val weekStart: DayOfWeek = DEFAULT_WEEK_START,
