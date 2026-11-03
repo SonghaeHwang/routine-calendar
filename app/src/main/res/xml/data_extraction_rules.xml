@@ -1,19 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12 이상의 자동 백업 · 기기 간 이전 규칙.
+    - 루틴 DB(databases/ 전체: .db · -wal · -shm)와 설정(DataStore)만 넣는다. include 를 쓰면 나머지는 빠진다
+    - 클라우드 백업은 종단간 암호화가 될 때만(잠금 화면이 없는 휴대폰에서는 하지 않음). 개발자는 내용을 볼 수 없다
+    - 가져오기 전 자동 저장 파일 · WorkManager DB 는 noBackupFilesDir 에 있어 백업되지 않는다
 -->
 <data-extraction-rules>
-    <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+    <cloud-backup disableIfNoEncryptionCapabilities="true">
+        <include domain="database" path="." />
+        <include domain="file" path="datastore/" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <include domain="database" path="." />
+        <include domain="file" path="datastore/" />
     </device-transfer>
-    -->
 </data-extraction-rules>

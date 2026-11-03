@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 11 이하의 자동 백업 규칙(12 이상은 data_extraction_rules.xml).
+    종단간 암호화될 때만 클라우드에 올린다. 이 조건 때문에 Android 8.x(API 26~27)에서는 자동 백업이 되지 않는다 —
+    그 휴대폰은 JSON 내보내기로 옮긴다.
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <include domain="database" path="." requireFlags="clientSideEncryption" />
+    <include domain="file" path="datastore/" requireFlags="clientSideEncryption" />
 </full-backup-content>
