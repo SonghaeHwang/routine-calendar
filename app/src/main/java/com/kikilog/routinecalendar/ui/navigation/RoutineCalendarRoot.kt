@@ -21,6 +21,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.kikilog.routinecalendar.ui.calendar.CalendarPlaceholder
 import com.kikilog.routinecalendar.ui.edit.EditRoutinePlaceholder
+import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
 import com.kikilog.routinecalendar.ui.routines.RoutinesPlaceholder
 import com.kikilog.routinecalendar.ui.settings.SettingsScreen
 import com.kikilog.routinecalendar.ui.today.TodayPlaceholder
@@ -68,7 +69,14 @@ fun RoutineCalendarRoot() {
                 entry<TodayKey> { TodayPlaceholder(onAdd = { openEdit(null) }, onOpenSettings = openSettings) }
                 entry<CalendarKey> { CalendarPlaceholder(onOpenSettings = openSettings) }
                 entry<RoutinesKey> { RoutinesPlaceholder(onAdd = { openEdit(null) }, onOpenSettings = openSettings) }
-                entry<EditKey> { EditRoutinePlaceholder(onBack = { goBack() }) }
+                entry<EditKey> { key ->
+                    if (key.routineId == null) {
+                        EditRoutineRoute(onDone = goBack)
+                    } else {
+                        // 수정 화면은 12번 작업에서
+                        EditRoutinePlaceholder(onBack = goBack)
+                    }
+                }
                 entry<SettingsKey> { SettingsScreen(onBack = { goBack() }) }
             },
         )

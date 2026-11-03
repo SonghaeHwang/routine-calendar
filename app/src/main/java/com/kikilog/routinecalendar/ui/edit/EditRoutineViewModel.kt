@@ -1,0 +1,94 @@
+package com.kikilog.routinecalendar.ui.edit
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.kikilog.routinecalendar.RoutineCalendarApp
+import com.kikilog.routinecalendar.core.model.Category
+import com.kikilog.routinecalendar.core.model.IntervalUnit
+import com.kikilog.routinecalendar.core.preset.Preset
+import com.kikilog.routinecalendar.data.RoutineDraft
+import com.kikilog.routinecalendar.data.RoutineRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
+
+/** 루틴 등록 화면. 수정 모드는 12번 작업에서 더한다. */
+class EditRoutineViewModel(
+    private val repository: RoutineRepository,
+    today: () -> LocalDate,
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(EditUiState(today = today()))
+    val state: StateFlow<EditUiState> = _state.asStateFlow()
+
+    fun onTitleChange(title: String) = _state.update { it.copy(title = title.take(MAX_TITLE_LENGTH)) }
+
+    fun onCategoryChange(category: Category) = _state.update { it.copy(category = category) }
+
+    /** 숫자만 받고, 세 자리까지 */
+    fun onAmountChange(text: String) = _state.update { it.copy(amountText = text.filter(Char::isDigit).take(3)) }
+
+    fun onUnitChange(unit: IntervalUnit) = _state.update { it.copy(unit = unit) }
+
+    fun onRepeatsChange(repeats: Boolean) = _state.update { it.copy(repeats = repeats) }
+
+    fun onNotifyChange(notify: Boolean) = _state.update { it.copy(notify = notify) }
+
+    /** 오늘 이후 날짜는 무시한다(날짜 선택기에서도 막지만 한 번 더) */
+    fun onLastDoneChange(date: LocalDate?) = _state.update {
+        if (date != null && date > it.today) it else it.copy(lastDoneOn = date)
+    }
+
+    /** 프리셋을 고르면 칸을 채운다. 주기가 없는 프리셋(리들샷)은 숫자 칸을 비워 직접 입력하게 한다. */
+    fun applyPreset(preset: Preset) = _state.update {
+        it.copy(
+            title = preset.title,
+            category = preset.category,
+            amountText = preset.interval?.amount?.toString() ?: "",
+            unit = preset.interval?.unit ?: it.unit,
+            repeats = preset.repeats,
+        )
+    }
+
+    fun onSaveFailedShown() = _state.update { it.copy(saveFailed = false) }
+
+    fun save() {
+        val current = _state.value
+        if (current.isSaving || current.saved) return
+        val interval = current.interval
+        if (!current.isValid || interval == null) {
+            _state.update { it.copy(showErrors = true) }
+            return
+        }
+        _state.update { it.copy(showErrors = true, isSaving = true) }
+        viewModelScope.launch {
+            val draft = RoutineDraft(
+                title = current.title,
+                category = current.category,
+                interval = interval,
+                repeats = current.repeats,
+                notify = current.notify,
+            )
+            runCatching { repository.add(draft, current.lastDoneOn) }
+                .onSuccess { _state.update { it.copy(isSaving = false, saved = true) } }
+                .onFailure { _state.update { it.copy(isSaving = false, saveFailed = true) } }
+        }
+    }
+
+    companion object {
+        const val MAX_TITLE_LENGTH = 30
+
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as RoutineCalendarApp).container
+                EditRoutineViewModel(container.routineRepository, container.todayClock::current)
+            }
+        }
+    }
+}
