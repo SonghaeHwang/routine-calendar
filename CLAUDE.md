@@ -46,7 +46,7 @@
 ## 지켜야 할 규칙
 
 1. **로컬 전용.** 서버 · 로그인 · 네트워크 호출을 넣지 않는다. `INTERNET` 권한을 추가하지 않는다.
-2. **권한은 알림(`POST_NOTIFICATIONS`) 하나.** 거절해도 앱의 나머지 기능은 동작해야 한다.
+2. **사용자에게 묻는 권한(런타임 권한)은 알림(`POST_NOTIFICATIONS`) 하나.** 거절해도 앱의 나머지 기능은 동작해야 한다. 설치 때 자동 허용되는 일반 권한은 라이브러리가 병합하는 것(예: WorkManager 의 `WAKE_LOCK` · `ACCESS_NETWORK_STATE` · `RECEIVE_BOOT_COMPLETED` · `FOREGROUND_SERVICE`)만 허용하고, 앱이 직접 선언하지 않는다. `INTERNET` · 정확한 알람 권한 · `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` 는 어떤 경로로도 들어오면 안 된다.
 3. **분석 · 광고 · 크래시 수집 SDK 금지.** Play 데이터 보안 양식에 "수집 · 공유 없음" 으로 적기 위해서다.
 4. **iOS 로 옮길 길을 열어 둔다.** 주기 계산과 도메인 모델은 `:core` 모듈(순수 Kotlin, `android.*` import 금지)에 둔다. 알림 · 위젯 · Room 같은 Android 전용 코드는 `:app` 의 별도 패키지에 모은다. 새 라이브러리는 KMP 지원 여부를 확인하고 고른다.
 5. **버전은 `gradle/libs.versions.toml` 에서만** 관리한다. build 파일에 버전 문자열을 직접 쓰지 않는다.

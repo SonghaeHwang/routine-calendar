@@ -22,7 +22,7 @@ Bash 는 아래 읽기 명령에만 쓴다. 그 밖의 명령(빌드 · 시험 �
 ## 검사 항목
 
 1. **로컬 전용** — `AndroidManifest.xml` 에 `INTERNET` · `ACCESS_NETWORK_STATE` 권한이 없는가. 코드에 `HttpURLConnection` · `OkHttp` · `Retrofit` · `Ktor` · `URL(` 같은 네트워크 호출이 없는가.
-2. **권한은 알림 하나** — 매니페스트 `<uses-permission>` 이 `POST_NOTIFICATIONS` 외에 늘었는가. 늘었다면 라이브러리 병합으로 들어온 것인지(예: WorkManager 의 `RECEIVE_BOOT_COMPLETED` · `WAKE_LOCK`) 구분해서 보고한다. `SCHEDULE_EXACT_ALARM` · `USE_EXACT_ALARM` 은 위반.
+2. **런타임 권한은 알림 하나** — 앱 매니페스트(`app/src/main/AndroidManifest.xml`)가 직접 선언한 `<uses-permission>` 이 `POST_NOTIFICATIONS` 하나뿐인가. 런타임 권한(위험 권한)을 요청하는 코드가 알림 말고 없는가. 라이브러리 병합으로 들어오는 일반 권한(예: WorkManager 의 `WAKE_LOCK` · `ACCESS_NETWORK_STATE` · `RECEIVE_BOOT_COMPLETED` · `FOREGROUND_SERVICE`)은 위반이 아니라 "새 의존성 · 권한" 목록에 적는다. `INTERNET` · `SCHEDULE_EXACT_ALARM` · `USE_EXACT_ALARM` · `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` 는 어떤 경로든 위반.
 3. **분석 · 광고 · 크래시 SDK 금지** — 의존성에 Firebase(Analytics · Crashlytics) · Google Ads · AppsFlyer · Sentry · Amplitude · Mixpanel 등이 없는가. 새로 추가된 의존성은 모두 그룹 · 버전 · 용도를 나열한다.
 4. **`:core` 는 순수 Kotlin** — `core/` 아래에 `import android.` · `import androidx.` · `java.time` 이 없는가(날짜는 `kotlinx-datetime`).
 5. **버전은 카탈로그에서만** — `*.gradle.kts` 에 `"group:name:1.2.3"` 같은 버전 문자열 직접 표기가 없는가. 버전은 `gradle/libs.versions.toml` 에만.
