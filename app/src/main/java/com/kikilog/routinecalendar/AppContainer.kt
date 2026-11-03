@@ -3,6 +3,7 @@ package com.kikilog.routinecalendar
 import android.content.Context
 import androidx.glance.appwidget.updateAll
 import androidx.work.WorkManager
+import com.kikilog.routinecalendar.backup.BackupRepository
 import com.kikilog.routinecalendar.data.AppDatabase
 import com.kikilog.routinecalendar.data.CategoryRepository
 import com.kikilog.routinecalendar.data.PresetRepository
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import java.io.File
 
 /** 수동 의존성 묶음. DB 는 처음 쓸 때 연다. */
 class AppContainer(context: Context) {
@@ -63,6 +65,18 @@ class AppContainer(context: Context) {
 
     val dailySummarySender: DailySummarySender by lazy {
         DailySummarySender(appContext, routineRepository, settingsRepository, today = todayClock::current)
+    }
+
+    /** JSON 내보내기 · 가져오기. 가져오기 전 자동 저장은 자동 백업에서 빠지는 폴더에 */
+    val backupRepository: BackupRepository by lazy {
+        BackupRepository(
+            dao = database.backupDao(),
+            settings = settingsRepository,
+            snapshotFile = File(appContext.noBackupFilesDir, "before-import.json"),
+            now = System::currentTimeMillis,
+            appVersion = appContext.packageManager.getPackageInfo(appContext.packageName, 0).versionName.orEmpty(),
+            onSettingsReplaced = notifyScheduler::syncIfEnabled,
+        )
     }
 
     /** 홈 화면 위젯의 자정 갱신 예약 */

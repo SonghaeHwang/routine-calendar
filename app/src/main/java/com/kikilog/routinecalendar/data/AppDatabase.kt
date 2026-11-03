@@ -7,6 +7,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.kikilog.routinecalendar.backup.BackupDao
 
 /**
  * 스키마는 app/schemas 에 내보내 커밋한다. 테이블을 바꾸면 version 을 올리고 마이그레이션을 추가한다.
@@ -28,6 +29,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun presetDao(): PresetDao
 
     abstract fun categoryDao(): CategoryDao
+
+    /** 백업 내보내기 · 가져오기. 테이블은 늘지 않는다(스키마 그대로) */
+    abstract fun backupDao(): BackupDao
 
     companion object {
         const val FILE_NAME = "routine-calendar.db"
