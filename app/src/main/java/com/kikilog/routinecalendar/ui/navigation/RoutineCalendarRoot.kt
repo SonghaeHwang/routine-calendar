@@ -24,7 +24,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.kikilog.routinecalendar.ui.calendar.CalendarPlaceholder
-import com.kikilog.routinecalendar.ui.edit.EditRoutinePlaceholder
 import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
 import com.kikilog.routinecalendar.ui.format.formatDate
@@ -47,6 +46,7 @@ fun RoutineCalendarRoot() {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val savedTemplate = stringResource(R.string.saved_message)
+    val editedMessage = stringResource(R.string.edited_message)
 
     Scaffold(
         // 시스템 바 여백은 하단 탭과 각 화면의 상단 바가 처리한다
@@ -85,19 +85,19 @@ fun RoutineCalendarRoot() {
                     RoutinesRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
                 }
                 entry<EditKey> { key ->
-                    if (key.routineId == null) {
-                        EditRoutineRoute(
-                            onBack = goBack,
-                            onSaved = { title, nextDue, today ->
-                                goBack()
-                                val message = savedTemplate.format(title, formatDate(nextDue, today))
-                                scope.launch { snackbarHostState.showSnackbar(message) }
-                            },
-                        )
-                    } else {
-                        // 수정 화면은 12번 작업에서
-                        EditRoutinePlaceholder(onBack = goBack)
-                    }
+                    EditRoutineRoute(
+                        routineId = key.routineId,
+                        onBack = goBack,
+                        onAdded = { title, nextDue, today ->
+                            goBack()
+                            val message = savedTemplate.format(title, formatDate(nextDue, today))
+                            scope.launch { snackbarHostState.showSnackbar(message) }
+                        },
+                        onEdited = {
+                            goBack()
+                            scope.launch { snackbarHostState.showSnackbar(editedMessage) }
+                        },
+                    )
                 }
                 entry<SettingsKey> { SettingsScreen(onBack = { goBack() }) }
             },

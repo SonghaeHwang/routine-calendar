@@ -171,4 +171,86 @@ class EditRoutineViewModelTest {
         assertEquals(LocalDate.parse("2027-01-02"), saved.firstDue)
         assertEquals(LocalDate.parse("2027-01-02"), state.savedNextDue)
     }
+
+    // ── 수정 모드 ──
+
+    private suspend fun addRoutine(
+        title: String,
+        amount: Int,
+        unit: IntervalUnit,
+        repeats: Boolean = true,
+        lastDoneOn: String? = null,
+    ): Long = repository.add(
+        com.kikilog.routinecalendar.data.RoutineDraft(title, Category.BEAUTY, Interval(amount, unit), repeats, notify = true),
+        lastDoneOn?.let(LocalDate::parse),
+    )
+
+    private suspend fun editViewModel(id: Long): EditRoutineViewModel =
+        EditRoutineViewModel(repository, today = { today }, routineId = id).also { vm -> vm.state.first { !it.isLoading } }
+
+    @Test
+    fun `수정 화면은 기존 값을 불러온다`() = runTest {
+        val id = addRoutine("젤팩", 1, IntervalUnit.WEEK, lastDoneOn = "2026-11-01")
+        val vm = editViewModel(id)
+
+        val s = vm.state.value
+        assertTrue(s.isEdit)
+        assertEquals("젤팩", s.title)
+        assertEquals(Category.BEAUTY, s.category)
+        assertEquals("1", s.amountText)
+        assertEquals(IntervalUnit.WEEK, s.unit)
+        assertTrue(s.repeats)
+        assertTrue(s.hasCompletions)
+    }
+
+    @Test
+    fun `기록이 있는 반복 루틴은 반복 스위치가 잠긴다`() = runTest {
+        val id = addRoutine("젤팩", 1, IntervalUnit.WEEK, lastDoneOn = "2026-11-01")
+        val vm = editViewModel(id)
+
+        assertTrue(vm.state.value.repeatsLocked)
+        vm.onRepeatsChange(false)
+        assertTrue(vm.state.value.repeats)
+    }
+
+    @Test
+    fun `기록이 없으면 반복도 바꿀 수 있고 처음 할 날을 고쳐 저장한다`() = runTest {
+        val id = addRoutine("화장지", 2, IntervalUnit.MONTH, repeats = false)
+        val vm = editViewModel(id)
+        assertFalse(vm.state.value.repeatsLocked)
+        assertEquals(LocalDate.parse("2027-01-02"), vm.state.value.firstDue)
+
+        vm.onAmountChange("3")
+        vm.onFirstDueChange(LocalDate.parse("2027-02-02"))
+        vm.save()
+        vm.state.first { it.saved }
+
+        val saved = savedRoutines().single().routine
+        assertEquals(Interval(3, IntervalUnit.MONTH), saved.interval)
+        assertEquals(LocalDate.parse("2027-02-02"), saved.firstDue)
+    }
+
+    @Test
+    fun `기록이 있으면 처음 할 날은 바뀌지 않고 주기와 이름만 저장된다`() = runTest {
+        val id = addRoutine("젤팩", 1, IntervalUnit.WEEK, lastDoneOn = "2026-11-01")
+        val vm = editViewModel(id)
+
+        vm.onFirstDueChange(LocalDate.parse("2026-12-25"))
+        vm.onTitleChange("젤팩 마스크")
+        vm.onAmountChange("2")
+        vm.save()
+        vm.state.first { it.saved }
+
+        val saved = savedRoutines().single()
+        assertEquals("젤팩 마스크", saved.routine.title)
+        assertEquals(Interval(2, IntervalUnit.WEEK), saved.routine.interval)
+        assertEquals(LocalDate.parse("2026-11-08"), saved.routine.firstDue)
+        assertEquals(listOf(LocalDate.parse("2026-11-01")), saved.completions.map { it.doneOn })
+    }
+
+    @Test
+    fun `없는 루틴을 열면 notFound`() = runTest {
+        val vm = EditRoutineViewModel(repository, today = { today }, routineId = 999)
+        assertTrue(vm.state.first { !it.isLoading }.notFound)
+    }
 }

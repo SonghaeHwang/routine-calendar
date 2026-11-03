@@ -13,11 +13,21 @@ enum class AmountError { INVALID, TOO_LARGE }
 const val MAX_INTERVAL_AMOUNT = 365
 
 /**
- * 등록 화면 상태. 주기 숫자는 입력 칸 글자 그대로([amountText]) 들고 있다가 저장할 때 검사한다.
+ * 등록 · 수정 화면 상태. 주기 숫자는 입력 칸 글자 그대로([amountText]) 들고 있다가 저장할 때 검사한다.
+ * @property routineId null 이면 등록, 아니면 수정
+ * @property hasCompletions 수정할 루틴에 완료 기록이 있는지. 있으면 처음 할 날 칸을 숨긴다
+ * @property repeatsLocked 기록이 있는 반복 루틴 — 반복을 끄면 저장하자마자 끝남이 되므로 잠근다
+ * @property firstDue 수정 모드에서 기록이 없을 때만 보이는 처음 할 날
  * @property showErrors 저장을 한 번 누른 뒤부터 오류를 보여 준다
  */
 data class EditUiState(
     val today: LocalDate,
+    val routineId: Long? = null,
+    val isLoading: Boolean = false,
+    val notFound: Boolean = false,
+    val hasCompletions: Boolean = false,
+    val repeatsLocked: Boolean = false,
+    val firstDue: LocalDate? = null,
     val title: String = "",
     val category: Category = Category.HOUSE,
     val amountText: String = "1",
@@ -45,6 +55,8 @@ data class EditUiState(
         }
 
     val isValid: Boolean get() = titleError == null && amountError == null
+
+    val isEdit: Boolean get() = routineId != null
 
     /** 검사를 통과했을 때만 쓴다 */
     val interval: Interval? get() = amountText.toIntOrNull()?.takeIf { amountError == null }?.let { Interval(it, unit) }

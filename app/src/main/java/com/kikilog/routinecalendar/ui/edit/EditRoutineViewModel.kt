@@ -15,18 +15,55 @@ import com.kikilog.routinecalendar.data.RoutineRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
-/** 루틴 등록 화면. 수정 모드는 12번 작업에서 더한다. */
+/**
+ * 루틴 등록 · 수정 화면.
+ * @param routineId null 이면 등록, 아니면 그 루틴을 불러와 수정한다
+ */
 class EditRoutineViewModel(
     private val repository: RoutineRepository,
     today: () -> LocalDate,
+    routineId: Long? = null,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(EditUiState(today = today()))
+    private val _state = MutableStateFlow(
+        EditUiState(today = today(), routineId = routineId, isLoading = routineId != null),
+    )
     val state: StateFlow<EditUiState> = _state.asStateFlow()
+
+    init {
+        if (routineId != null) load(routineId)
+    }
+
+    private fun load(id: Long) {
+        viewModelScope.launch {
+            val loaded = repository.observeRoutine(id).first()
+            if (loaded == null) {
+                _state.update { it.copy(isLoading = false, notFound = true) }
+                return@launch
+            }
+            val (routine, completions) = loaded
+            val hasCompletions = completions.isNotEmpty()
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    title = routine.title,
+                    category = routine.category,
+                    amountText = routine.interval.amount.toString(),
+                    unit = routine.interval.unit,
+                    repeats = routine.repeats,
+                    notify = routine.notify,
+                    hasCompletions = hasCompletions,
+                    repeatsLocked = hasCompletions && routine.repeats,
+                    firstDue = routine.firstDue,
+                )
+            }
+        }
+    }
 
     fun onTitleChange(title: String) = _state.update { it.copy(title = title.take(MAX_TITLE_LENGTH)) }
 
@@ -37,7 +74,8 @@ class EditRoutineViewModel(
 
     fun onUnitChange(unit: IntervalUnit) = _state.update { it.copy(unit = unit) }
 
-    fun onRepeatsChange(repeats: Boolean) = _state.update { it.copy(repeats = repeats) }
+    /** 잠긴 경우(기록이 있는 반복 루틴)는 무시한다 */
+    fun onRepeatsChange(repeats: Boolean) = _state.update { if (it.repeatsLocked) it else it.copy(repeats = repeats) }
 
     fun onNotifyChange(notify: Boolean) = _state.update { it.copy(notify = notify) }
 
@@ -45,6 +83,9 @@ class EditRoutineViewModel(
     fun onLastDoneChange(date: LocalDate?) = _state.update {
         if (date != null && date > it.today) it else it.copy(lastDoneOn = date)
     }
+
+    /** 수정 모드에서 기록이 없을 때만. 과거 · 미래 모두 고를 수 있다 */
+    fun onFirstDueChange(date: LocalDate) = _state.update { if (it.hasCompletions) it else it.copy(firstDue = date) }
 
     /** 프리셋을 고르면 칸을 채운다. 주기가 없는 프리셋(리들샷)은 숫자 칸을 비워 직접 입력하게 한다. */
     fun applyPreset(preset: Preset) = _state.update {
@@ -61,7 +102,7 @@ class EditRoutineViewModel(
 
     fun save() {
         val current = _state.value
-        if (current.isSaving || current.saved) return
+        if (current.isSaving || current.saved || current.isLoading) return
         val interval = current.interval
         if (!current.isValid || interval == null) {
             _state.update { it.copy(showErrors = true) }
@@ -76,12 +117,18 @@ class EditRoutineViewModel(
                 repeats = current.repeats,
                 notify = current.notify,
             )
-            runCatching { repository.add(draft, current.lastDoneOn) }
-                .onSuccess {
+            val id = current.routineId
+            runCatching {
+                if (id == null) {
+                    repository.add(draft, current.lastDoneOn)
                     // 등록 직후에는 다음 예정일 = 첫 예정일
-                    val nextDue = initialSchedule(interval, current.repeats, current.today, current.lastDoneOn).firstDue
-                    _state.update { it.copy(isSaving = false, saved = true, savedNextDue = nextDue) }
+                    initialSchedule(interval, current.repeats, current.today, current.lastDoneOn).firstDue
+                } else {
+                    repository.update(id, draft, firstDue = current.firstDue.takeIf { !current.hasCompletions })
+                    null
                 }
+            }
+                .onSuccess { nextDue -> _state.update { it.copy(isSaving = false, saved = true, savedNextDue = nextDue) } }
                 .onFailure { _state.update { it.copy(isSaving = false, saveFailed = true) } }
         }
     }
@@ -89,10 +136,10 @@ class EditRoutineViewModel(
     companion object {
         const val MAX_TITLE_LENGTH = 30
 
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
+        fun factory(routineId: Long?): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as RoutineCalendarApp).container
-                EditRoutineViewModel(container.routineRepository, container.todayClock::current)
+                EditRoutineViewModel(container.routineRepository, container.todayClock::current, routineId)
             }
         }
     }

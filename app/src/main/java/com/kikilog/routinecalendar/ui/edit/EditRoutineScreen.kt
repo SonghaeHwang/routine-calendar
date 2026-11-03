@@ -63,16 +63,29 @@ import kotlinx.datetime.LocalDate
 
 /**
  * 화면 이동에서 부르는 입구. ViewModel 은 이 화면이 닫힐 때 함께 정리된다.
- * @param onSaved 저장되면 이름 · 다음 예정일 · 오늘을 넘겨 안내 문구를 띄우게 한다(화면은 부르는 쪽이 닫는다)
+ * @param routineId null 이면 등록, 아니면 수정
+ * @param onAdded 등록되면 이름 · 다음 예정일 · 오늘을 넘겨 안내 문구를 띄우게 한다(화면은 부르는 쪽이 닫는다)
+ * @param onEdited 수정이 저장되면 부른다
  */
 @Composable
-fun EditRoutineRoute(onBack: () -> Unit, onSaved: (title: String, nextDue: LocalDate, today: LocalDate) -> Unit) {
-    val viewModel: EditRoutineViewModel = viewModel(factory = EditRoutineViewModel.Factory)
+fun EditRoutineRoute(
+    routineId: Long?,
+    onBack: () -> Unit,
+    onAdded: (title: String, nextDue: LocalDate, today: LocalDate) -> Unit,
+    onEdited: () -> Unit,
+) {
+    val viewModel: EditRoutineViewModel = viewModel(factory = EditRoutineViewModel.factory(routineId))
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state.saved) {
+    LaunchedEffect(state.saved, state.notFound) {
         val nextDue = state.savedNextDue
-        if (state.saved && nextDue != null) onSaved(state.title.trim(), nextDue, state.today)
+        when {
+            // 없는 루틴(이미 삭제됨)을 열면 돌아간다
+            state.notFound -> onBack()
+            !state.saved -> Unit
+            state.isEdit -> onEdited()
+            nextDue != null -> onAdded(state.title.trim(), nextDue, state.today)
+        }
     }
 
     EditRoutineScreen(
@@ -85,6 +98,7 @@ fun EditRoutineRoute(onBack: () -> Unit, onSaved: (title: String, nextDue: Local
         onRepeatsChange = viewModel::onRepeatsChange,
         onNotifyChange = viewModel::onNotifyChange,
         onLastDoneChange = viewModel::onLastDoneChange,
+        onFirstDueChange = viewModel::onFirstDueChange,
         onPreset = viewModel::applyPreset,
         onSave = viewModel::save,
         onSaveFailedShown = viewModel::onSaveFailedShown,
@@ -101,7 +115,8 @@ fun EditRoutineScreen(
     onUnitChange: (IntervalUnit) -> Unit,
     onRepeatsChange: (Boolean) -> Unit,
     onNotifyChange: (Boolean) -> Unit,
-    onLastDoneChange: (kotlinx.datetime.LocalDate?) -> Unit,
+    onLastDoneChange: (LocalDate?) -> Unit,
+    onFirstDueChange: (LocalDate) -> Unit,
     onPreset: (Preset) -> Unit,
     onSave: () -> Unit,
     onSaveFailedShown: () -> Unit,
@@ -116,10 +131,12 @@ fun EditRoutineScreen(
     }
 
     SubScaffold(
-        title = stringResource(R.string.add_routine),
+        title = stringResource(if (state.isEdit) R.string.edit_routine else R.string.add_routine),
         onBack = onBack,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
+        // 수정할 루틴을 불러오는 짧은 동안은 빈 칸을 보여 주지 않는다
+        if (state.isLoading || state.notFound) return@SubScaffold
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -129,8 +146,10 @@ fun EditRoutineScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            PresetSection(onPreset)
-            HorizontalDivider()
+            if (!state.isEdit) {
+                PresetSection(onPreset)
+                HorizontalDivider()
+            }
 
             OutlinedTextField(
                 value = state.title,
@@ -193,16 +212,45 @@ fun EditRoutineScreen(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.label_repeats)) },
                 supportingContent = {
-                    Text(stringResource(if (state.repeats) R.string.repeats_on_hint else R.string.repeats_off_hint))
+                    Text(
+                        stringResource(
+                            when {
+                                state.repeatsLocked -> R.string.repeats_locked_hint
+                                state.repeats -> R.string.repeats_on_hint
+                                else -> R.string.repeats_off_hint
+                            },
+                        ),
+                    )
                 },
-                trailingContent = { Switch(checked = state.repeats, onCheckedChange = onRepeatsChange) },
+                trailingContent = {
+                    Switch(checked = state.repeats, onCheckedChange = onRepeatsChange, enabled = !state.repeatsLocked)
+                },
             )
 
-            LastDoneField(
-                lastDoneOn = state.lastDoneOn,
-                today = state.today,
-                onChange = onLastDoneChange,
-            )
+            if (!state.isEdit) {
+                DateField(
+                    title = stringResource(R.string.label_last_done),
+                    date = state.lastDoneOn,
+                    today = state.today,
+                    emptyText = stringResource(R.string.last_done_none),
+                    hint = stringResource(R.string.last_done_hint),
+                    allowFuture = false,
+                    onChange = onLastDoneChange,
+                )
+            } else if (!state.hasCompletions) {
+                state.firstDue?.let { firstDue ->
+                    DateField(
+                        title = stringResource(R.string.label_first_due),
+                        date = firstDue,
+                        today = state.today,
+                        emptyText = "",
+                        hint = stringResource(R.string.first_due_hint),
+                        allowFuture = true,
+                        onChange = { it?.let(onFirstDueChange) },
+                        clearable = false,
+                    )
+                }
+            }
 
             ListItem(
                 headlineContent = { Text(stringResource(R.string.label_notify)) },
@@ -240,26 +288,35 @@ private fun PresetSection(onPreset: (Preset) -> Unit) {
     }
 }
 
+/**
+ * 날짜 하나를 고르는 칸. 누르면 날짜 선택기가 열린다.
+ * @param allowFuture false 면 오늘 이후는 고를 수 없다(마지막으로 한 날)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LastDoneField(
-    lastDoneOn: kotlinx.datetime.LocalDate?,
-    today: kotlinx.datetime.LocalDate,
-    onChange: (kotlinx.datetime.LocalDate?) -> Unit,
+private fun DateField(
+    title: String,
+    date: LocalDate?,
+    today: LocalDate,
+    emptyText: String,
+    hint: String,
+    allowFuture: Boolean,
+    onChange: (LocalDate?) -> Unit,
+    clearable: Boolean = true,
 ) {
     var showPicker by rememberSaveable { mutableStateOf(false) }
 
-    Section(stringResource(R.string.label_last_done)) {
+    Section(title) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedButton(onClick = { showPicker = true }, modifier = Modifier.weight(1f)) {
-                Text(lastDoneOn?.let { formatDate(it, today) } ?: stringResource(R.string.last_done_none))
+                Text(date?.let { formatDate(it, today) } ?: emptyText)
             }
-            if (lastDoneOn != null) {
+            if (clearable && date != null) {
                 TextButton(onClick = { onChange(null) }) { Text(stringResource(R.string.clear)) }
             }
         }
         Text(
-            text = stringResource(R.string.last_done_hint),
+            text = hint,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -268,10 +325,9 @@ private fun LastDoneField(
     if (showPicker) {
         val todayMillis = today.toPickerMillis()
         val pickerState = rememberDatePickerState(
-            initialSelectedDateMillis = (lastDoneOn ?: today).toPickerMillis(),
+            initialSelectedDateMillis = (date ?: today).toPickerMillis(),
             selectableDates = object : SelectableDates {
-                // 아직 오지 않은 날은 고를 수 없다
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= todayMillis
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean = allowFuture || utcTimeMillis <= todayMillis
             },
         )
         DatePickerDialog(
