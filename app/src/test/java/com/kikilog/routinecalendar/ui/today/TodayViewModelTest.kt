@@ -12,12 +12,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -45,7 +43,7 @@ class TodayViewModelTest {
             .allowMainThreadQueries()
             .build()
         repository = RoutineRepository(db.routineDao(), today = { today.value }, now = { 1_000L })
-        viewModel = TodayViewModel(repository, today, flowOf(DayOfWeek.SUNDAY))
+        viewModel = TodayViewModel(repository, today)
     }
 
     @After
@@ -68,16 +66,16 @@ class TodayViewModelTest {
     }
 
     @Test
-    fun `지난 것 · 오늘 · 이번 주로 나뉜다`() = runTest {
+    fun `지난 것 · 오늘 · 다가오는 7일로 나뉜다`() = runTest {
         add("각질제거", amount = 10, lastDoneOn = "2026-10-20") // 예정 10-30 → 3일 지남
         add("모델링팩", amount = 7) // 마지막으로 한 날 없음 → 오늘
-        add("이불 세탁", amount = 7, lastDoneOn = "2026-10-30") // 예정 11-06(금) → 이번 주
+        add("이불 세탁", amount = 7, lastDoneOn = "2026-10-30") // 예정 11-06(금) → 다가오는 7일
 
-        val board = viewModel.state.first { it.hasAnyRoutine && !it.board.isEmpty && it.board.thisWeek.isNotEmpty() }.board
+        val board = viewModel.state.first { it.hasAnyRoutine && !it.board.isEmpty && it.board.upcoming.isNotEmpty() }.board
         assertEquals(listOf("각질제거"), board.overdue.map { it.routine.title })
         assertEquals(3, board.overdue.single().overdueDays)
         assertEquals(listOf("모델링팩"), board.dueToday.map { it.routine.title })
-        assertEquals(listOf("이불 세탁"), board.thisWeek.map { it.routine.title })
+        assertEquals(listOf("이불 세탁"), board.upcoming.map { it.routine.title })
     }
 
     @Test
@@ -97,9 +95,9 @@ class TodayViewModelTest {
     }
 
     @Test
-    fun `이번 주 루틴을 일찍 체크하면 오늘 기록으로 저장된다`() = runTest {
+    fun `다가오는 루틴을 일찍 체크하면 오늘 기록으로 저장된다`() = runTest {
         val id = add("이불 세탁", amount = 7, lastDoneOn = "2026-10-30")
-        val entry = viewModel.state.first { it.board.thisWeek.isNotEmpty() }.board.thisWeek.single()
+        val entry = viewModel.state.first { it.board.upcoming.isNotEmpty() }.board.upcoming.single()
 
         viewModel.onToggle(entry)
         viewModel.state.first { it.board.dueToday.isNotEmpty() }

@@ -70,7 +70,7 @@ fun TodayScreen(
             ) {
                 section(R.string.section_overdue, state.board.overdue, today, onToggle)
                 section(R.string.section_today, state.board.dueToday, today, onToggle)
-                section(R.string.section_this_week, state.board.thisWeek, today, onToggle)
+                section(R.string.section_upcoming, state.board.upcoming, today, onToggle)
             }
         }
     }

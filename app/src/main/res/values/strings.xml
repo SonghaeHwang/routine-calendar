@@ -39,8 +39,9 @@
     <!-- 오늘 화면 -->
     <string name="section_overdue">지난 것</string>
     <string name="section_today">오늘</string>
-    <string name="section_this_week">이번 주</string>
-    <string name="empty_today">오늘과 이번 주에 할 루틴이 없어요</string>
+    <string name="section_upcoming">다가오는 7일</string>
+    <string name="empty_today">오늘부터 7일 안에 할 루틴이 없어요.\n루틴 탭에서 다음 예정일을 볼 수 있어요</string>
+    <string name="saved_message">%1$s 등록했어요 · 다음: %2$s</string>
     <string name="today_no_routines">아직 등록한 루틴이 없어요.\n오른쪽 아래 + 로 추가해 보세요</string>
     <plurals name="overdue_days">
         <item quantity="other">%1$d일 지남</item>

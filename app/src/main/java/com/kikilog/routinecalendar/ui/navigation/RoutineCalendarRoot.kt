@@ -7,8 +7,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -21,7 +25,10 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.kikilog.routinecalendar.ui.calendar.CalendarPlaceholder
 import com.kikilog.routinecalendar.ui.edit.EditRoutinePlaceholder
+import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.ui.edit.EditRoutineRoute
+import com.kikilog.routinecalendar.ui.format.formatDate
+import kotlinx.coroutines.launch
 import com.kikilog.routinecalendar.ui.routines.RoutinesRoute
 import com.kikilog.routinecalendar.ui.settings.SettingsScreen
 import com.kikilog.routinecalendar.ui.today.TodayRoute
@@ -36,9 +43,15 @@ fun RoutineCalendarRoot() {
     val openEdit: (Long?) -> Unit = { routineId -> backStack.add(EditKey(routineId)) }
     val goBack: () -> Unit = { backStack.removeLastOrNull() }
 
+    // 등록 후 안내 문구. 등록 화면이 닫힌 뒤 아래 화면 위에 띄운다
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val savedTemplate = stringResource(R.string.saved_message)
+
     Scaffold(
         // 시스템 바 여백은 하단 탭과 각 화면의 상단 바가 처리한다
         contentWindowInsets = WindowInsets(0),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (currentTab != null) {
                 NavigationBar {
@@ -73,7 +86,14 @@ fun RoutineCalendarRoot() {
                 }
                 entry<EditKey> { key ->
                     if (key.routineId == null) {
-                        EditRoutineRoute(onDone = goBack)
+                        EditRoutineRoute(
+                            onBack = goBack,
+                            onSaved = { title, nextDue, today ->
+                                goBack()
+                                val message = savedTemplate.format(title, formatDate(nextDue, today))
+                                scope.launch { snackbarHostState.showSnackbar(message) }
+                            },
+                        )
                     } else {
                         // 수정 화면은 12번 작업에서
                         EditRoutinePlaceholder(onBack = goBack)

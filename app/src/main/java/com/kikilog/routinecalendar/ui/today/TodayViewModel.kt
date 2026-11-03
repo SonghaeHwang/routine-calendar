@@ -10,13 +10,11 @@ import com.kikilog.routinecalendar.core.schedule.TodayBoard
 import com.kikilog.routinecalendar.core.schedule.TodayEntry
 import com.kikilog.routinecalendar.core.schedule.buildTodayBoard
 import com.kikilog.routinecalendar.data.RoutineRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 data class TodayUiState(
@@ -30,15 +28,14 @@ data class TodayUiState(
 class TodayViewModel(
     private val repository: RoutineRepository,
     today: StateFlow<LocalDate>,
-    weekStart: Flow<DayOfWeek>,
 ) : ViewModel() {
 
     val state: StateFlow<TodayUiState> =
-        combine(repository.observeRoutines(), today, weekStart) { items, date, start ->
+        combine(repository.observeRoutines(), today) { items, date ->
             TodayUiState(
                 isLoading = false,
                 today = date,
-                board = buildTodayBoard(items.map { it.routine to it.completions }, date, start),
+                board = buildTodayBoard(items.map { it.routine to it.completions }, date),
                 hasAnyRoutine = items.isNotEmpty(),
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState())
@@ -63,7 +60,7 @@ class TodayViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as RoutineCalendarApp).container
-                TodayViewModel(container.routineRepository, container.todayClock.today, container.weekStart)
+                TodayViewModel(container.routineRepository, container.todayClock.today)
             }
         }
     }

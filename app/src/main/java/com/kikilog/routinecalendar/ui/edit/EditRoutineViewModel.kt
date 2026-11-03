@@ -9,6 +9,7 @@ import com.kikilog.routinecalendar.RoutineCalendarApp
 import com.kikilog.routinecalendar.core.model.Category
 import com.kikilog.routinecalendar.core.model.IntervalUnit
 import com.kikilog.routinecalendar.core.preset.Preset
+import com.kikilog.routinecalendar.core.schedule.initialSchedule
 import com.kikilog.routinecalendar.data.RoutineDraft
 import com.kikilog.routinecalendar.data.RoutineRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,7 +77,11 @@ class EditRoutineViewModel(
                 notify = current.notify,
             )
             runCatching { repository.add(draft, current.lastDoneOn) }
-                .onSuccess { _state.update { it.copy(isSaving = false, saved = true) } }
+                .onSuccess {
+                    // 등록 직후에는 다음 예정일 = 첫 예정일
+                    val nextDue = initialSchedule(interval, current.repeats, current.today, current.lastDoneOn).firstDue
+                    _state.update { it.copy(isSaving = false, saved = true, savedNextDue = nextDue) }
+                }
                 .onFailure { _state.update { it.copy(isSaving = false, saveFailed = true) } }
         }
     }

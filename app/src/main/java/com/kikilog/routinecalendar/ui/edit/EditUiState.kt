@@ -28,6 +28,8 @@ data class EditUiState(
     val showErrors: Boolean = false,
     val isSaving: Boolean = false,
     val saved: Boolean = false,
+    /** 저장한 루틴의 다음 예정일. 저장 후 안내 문구에 쓴다 */
+    val savedNextDue: LocalDate? = null,
     val saveFailed: Boolean = false,
 ) {
     val titleError: TitleError? get() = if (title.isBlank()) TitleError.EMPTY else null

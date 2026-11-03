@@ -59,20 +59,25 @@ import com.kikilog.routinecalendar.ui.format.categoryLabel
 import com.kikilog.routinecalendar.ui.format.formatDate
 import com.kikilog.routinecalendar.ui.format.pickerMillisToDate
 import com.kikilog.routinecalendar.ui.format.toPickerMillis
+import kotlinx.datetime.LocalDate
 
-/** 화면 이동에서 부르는 입구. ViewModel 은 이 화면이 닫힐 때 함께 정리된다. */
+/**
+ * 화면 이동에서 부르는 입구. ViewModel 은 이 화면이 닫힐 때 함께 정리된다.
+ * @param onSaved 저장되면 이름 · 다음 예정일 · 오늘을 넘겨 안내 문구를 띄우게 한다(화면은 부르는 쪽이 닫는다)
+ */
 @Composable
-fun EditRoutineRoute(onDone: () -> Unit) {
+fun EditRoutineRoute(onBack: () -> Unit, onSaved: (title: String, nextDue: LocalDate, today: LocalDate) -> Unit) {
     val viewModel: EditRoutineViewModel = viewModel(factory = EditRoutineViewModel.Factory)
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.saved) {
-        if (state.saved) onDone()
+        val nextDue = state.savedNextDue
+        if (state.saved && nextDue != null) onSaved(state.title.trim(), nextDue, state.today)
     }
 
     EditRoutineScreen(
         state = state,
-        onBack = onDone,
+        onBack = onBack,
         onTitleChange = viewModel::onTitleChange,
         onCategoryChange = viewModel::onCategoryChange,
         onAmountChange = viewModel::onAmountChange,

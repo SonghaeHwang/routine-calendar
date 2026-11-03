@@ -149,6 +149,8 @@ class EditRoutineViewModelTest {
         assertEquals(Interval(10, IntervalUnit.DAY), saved.routine.interval)
         assertEquals(LocalDate.parse("2026-10-30"), saved.routine.firstDue)
         assertEquals(listOf(LocalDate.parse("2026-10-20")), saved.completions.map { it.doneOn })
+        // 저장 후 안내 문구에 쓸 다음 예정일
+        assertEquals(LocalDate.parse("2026-10-30"), state.savedNextDue)
     }
 
     @Test
@@ -167,5 +169,6 @@ class EditRoutineViewModelTest {
         assertFalse(saved.repeats)
         assertFalse(saved.notify)
         assertEquals(LocalDate.parse("2027-01-02"), saved.firstDue)
+        assertEquals(LocalDate.parse("2027-01-02"), state.savedNextDue)
     }
 }
