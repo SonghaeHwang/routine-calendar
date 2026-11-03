@@ -3,7 +3,7 @@
 
     <!-- 하단 탭 · 공통 -->
     <string name="tab_today">오늘</string>
-    <string name="tab_calendar">캘린더</string>
+    <string name="tab_calendar">달력</string>
     <string name="tab_routines">루틴</string>
     <string name="settings">설정</string>
     <string name="add_routine">루틴 추가</string>
@@ -113,7 +113,7 @@
     <string name="interval_once_week">%1$d주 후 한 번</string>
     <string name="interval_once_month">%1$d개월 후 한 번</string>
 
-    <!-- 캘린더 -->
+    <!-- 달력 -->
     <string name="calendar_month_title">%1$d년 %2$d월</string>
     <string name="calendar_prev">이전 달</string>
     <string name="calendar_next">다음 달</string>
@@ -131,7 +131,7 @@
     <string name="settings_presets">빠른 선택 편집</string>
     <string name="settings_presets_hint">루틴 등록 화면 위쪽의 빠른 선택 목록을 고쳐요</string>
     <string name="settings_week_start">주 시작 요일</string>
-    <string name="settings_week_start_hint">캘린더 한 줄이 이 요일부터 시작해요</string>
+    <string name="settings_week_start_hint">달력 한 줄이 이 요일부터 시작해요</string>
     <string name="settings_week_sunday">일요일</string>
     <string name="settings_week_monday">월요일</string>
     <string name="settings_start_screen">첫 화면</string>

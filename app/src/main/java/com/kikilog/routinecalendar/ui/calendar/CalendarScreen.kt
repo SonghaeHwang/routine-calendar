@@ -20,7 +20,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,10 +53,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kikilog.routinecalendar.R
+import com.kikilog.routinecalendar.core.model.Category
 import com.kikilog.routinecalendar.core.schedule.CalendarDay
 import com.kikilog.routinecalendar.core.schedule.CalendarEntry
 import com.kikilog.routinecalendar.core.schedule.weekDays
 import com.kikilog.routinecalendar.ui.common.AddRoutineButton
+import com.kikilog.routinecalendar.ui.common.CategoryDot
+import com.kikilog.routinecalendar.ui.common.color
+import com.kikilog.routinecalendar.ui.common.rememberNotificationEnabler
+import com.kikilog.routinecalendar.ui.format.notifyTimeLabel
 import com.kikilog.routinecalendar.ui.common.TabScaffold
 import com.kikilog.routinecalendar.ui.format.dayOfWeekShort
 import com.kikilog.routinecalendar.ui.format.formatDate
@@ -63,8 +73,11 @@ import kotlinx.datetime.number
 fun CalendarRoute(onAdd: () -> Unit, onOpen: (Long) -> Unit, onOpenSettings: () -> Unit) {
     val viewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val requestNotify = rememberNotificationEnabler(viewModel::onNotifyPermissionResult)
     CalendarScreen(
         state = state,
+        onEnableNotify = requestNotify,
+        onDismissNotifyCard = viewModel::onDismissNotifyCard,
         onAdd = onAdd,
         onOpen = onOpen,
         onOpenSettings = onOpenSettings,
@@ -87,6 +100,8 @@ fun CalendarScreen(
     onGoToday: () -> Unit,
     onSelect: (LocalDate) -> Unit,
     onToggle: (CalendarEntry) -> Unit,
+    onEnableNotify: () -> Unit = {},
+    onDismissNotifyCard: () -> Unit = {},
 ) {
     TabScaffold(
         title = stringResource(R.string.tab_calendar),
@@ -111,14 +126,19 @@ fun CalendarScreen(
             }
             item(key = "grid") {
                 MonthGrid(
-                    gridDates = state.gridDates,
+                    state = state,
                     month = month,
                     today = today,
                     selected = selected,
-                    weekStart = state.weekStart,
-                    days = state.days,
                     onSelect = onSelect,
+                    onSwipePrev = onPrevMonth,
+                    onSwipeNext = onNextMonth,
                 )
+            }
+            if (state.showNotifyCard) {
+                item(key = "notify-card") {
+                    NotifyCard(notifyTimeLabel(state.notifyTime), onEnable = onEnableNotify, onLater = onDismissNotifyCard)
+                }
             }
             item(key = "selected-title") {
                 HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
@@ -144,6 +164,7 @@ fun CalendarScreen(
             items(state.entries, key = { "entry-${it.routine.id}" }) { entry ->
                 EntryRow(
                     entry = entry,
+                    category = state.categories.firstOrNull { it.id == entry.routine.categoryId },
                     checkable = selected <= today,
                     overdue = entry.due && !entry.done && selected < today,
                     onToggle = { onToggle(entry) },
@@ -178,18 +199,62 @@ private fun MonthHeader(month: LocalDate, onPrev: () -> Unit, onNext: () -> Unit
     }
 }
 
-/** 요일 머리글 + 날짜 칸. 칸 수가 42개 이하로 정해져 있어 LazyVerticalGrid 대신 줄(Row)로 그린다 */
+/** 루틴을 등록한 뒤 한 번만 보이는 알림 안내. 처음 켜자마자 권한을 묻지 않기 위해 여기서 묻는다 */
+@Composable
+private fun NotifyCard(timeLabel: String, onEnable: () -> Unit, onLater: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 4.dp)) {
+            Text(
+                stringResource(R.string.notify_card_body, timeLabel),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(end = 8.dp),
+            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = onLater) { Text(stringResource(R.string.notify_card_later)) }
+                TextButton(onClick = onEnable) { Text(stringResource(R.string.notify_card_enable)) }
+            }
+        }
+    }
+}
+
+/**
+ * 요일 머리글 + 날짜 칸. 칸 수가 42개 이하로 정해져 있어 LazyVerticalGrid 대신 줄(Row)로 그린다.
+ * 좌우로 밀면 이전 달 · 다음 달로 간다(끝까지 민 거리가 [SWIPE_THRESHOLD] 를 넘을 때).
+ */
 @Composable
 private fun MonthGrid(
-    gridDates: List<LocalDate>,
+    state: CalendarUiState,
     month: LocalDate,
     today: LocalDate,
     selected: LocalDate,
-    weekStart: DayOfWeek,
-    days: Map<LocalDate, CalendarDay>,
     onSelect: (LocalDate) -> Unit,
+    onSwipePrev: () -> Unit,
+    onSwipeNext: () -> Unit,
 ) {
-    Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+    val gridDates = state.gridDates
+    val weekStart = state.weekStart
+    val days = state.days
+    val threshold = with(LocalDensity.current) { SWIPE_THRESHOLD.toPx() }
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .pointerInput(month) {
+                var total = 0f
+                detectHorizontalDragGestures(
+                    onDragStart = { total = 0f },
+                    onHorizontalDrag = { change, dx ->
+                        change.consume()
+                        total += dx
+                    },
+                    onDragEnd = {
+                        when {
+                            total > threshold -> onSwipePrev()
+                            total < -threshold -> onSwipeNext()
+                        }
+                    },
+                )
+            },
+    ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             weekDays(weekStart).forEach { day ->
                 Text(
@@ -209,13 +274,16 @@ private fun MonthGrid(
         gridDates.chunked(7).forEach { week ->
             Row(modifier = Modifier.fillMaxWidth()) {
                 week.forEach { date ->
+                    val day = days[date]
                     DayCell(
                         date = date,
                         inMonth = date.month == month.month && date.year == month.year,
                         isToday = date == today,
                         isSelected = date == selected,
                         isPast = date < today,
-                        day = days[date],
+                        day = day,
+                        dueCategories = day?.let { state.categoriesOf(it.dueIds) }.orEmpty(),
+                        doneCategories = day?.let { state.categoriesOf(it.doneIds) }.orEmpty(),
                         onClick = { onSelect(date) },
                         modifier = Modifier.weight(1f),
                     )
@@ -226,7 +294,8 @@ private fun MonthGrid(
 }
 
 /**
- * 날짜 한 칸: 숫자 + 아래 표시. ● 는 할 예정(지났는데 안 했으면 빨강), ✓ 는 그날 한 것.
+ * 날짜 한 칸: 숫자 + 아래 표시. 분류마다 그 색 점 하나(할 예정), 지났는데 안 한 것은 빨간 테두리 점,
+ * 그날 한 것은 그 분류 색 ✓. 칸이 작아 최대 [MAX_MARKS] 개까지, 넘치면 「+」.
  * 오늘은 동그라미 배경, 고른 날은 테두리, 앞뒤 달은 흐리게.
  */
 @Composable
@@ -237,6 +306,8 @@ private fun DayCell(
     isSelected: Boolean,
     isPast: Boolean,
     day: CalendarDay?,
+    dueCategories: List<Category>,
+    doneCategories: List<Category>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -276,29 +347,48 @@ private fun DayCell(
                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-            if (dueCount > 0) {
-                Text(
-                    text = "●",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isPast) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                )
+        val marks = dueCategories.map { it to false } + doneCategories.map { it to true }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.heightIn(min = 14.dp),
+        ) {
+            marks.take(MAX_MARKS).forEach { (category, done) ->
+                if (done) {
+                    Text(text = "✓", style = MaterialTheme.typography.labelSmall, color = category.color)
+                } else {
+                    CategoryDot(
+                        color = category.color,
+                        size = MARK_SIZE,
+                        // 지났는데 안 한 예정은 빨간 테두리
+                        modifier = if (isPast) {
+                            Modifier.border(1.5.dp, MaterialTheme.colorScheme.error, CircleShape)
+                        } else {
+                            Modifier
+                        },
+                    )
+                }
             }
-            if (doneCount > 0) {
-                Text(text = "✓", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
+            if (marks.size > MAX_MARKS) {
+                Text(text = "+", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 }
 
+private const val MAX_MARKS = 4
+private val MARK_SIZE: Dp = 7.dp
+private val SWIPE_THRESHOLD: Dp = 56.dp
+
 /**
- * 고른 날짜의 한 줄. 오늘이거나 지난 날이면 눌러서 그날 한 것을 기록 · 취소, 꾹 누르면 수정.
- * 아직 오지 않은 날은 예정만 보여 준다.
+ * 고른 날짜의 한 줄. 오늘이거나 지난 날이면 눌러서 그날 한 것을 기록 · 취소, 꾹 누르면 루틴 정보.
+ * 아직 오지 않은 날은 예정만 보여 준다(누르면 루틴 정보).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun EntryRow(
     entry: CalendarEntry,
+    category: Category?,
     checkable: Boolean,
     overdue: Boolean,
     onToggle: () -> Unit,
@@ -312,7 +402,7 @@ private fun EntryRow(
                 role = if (checkable) Role.Checkbox else Role.Button,
                 onClick = { if (checkable) onToggle() else onOpen() },
                 onLongClick = onOpen,
-                onLongClickLabel = stringResource(R.string.edit_routine),
+                onLongClickLabel = stringResource(R.string.routine_info),
             )
             .then(if (checkable) Modifier.semantics { toggleableState = ToggleableState(entry.done) } else Modifier)
             .padding(horizontal = 8.dp),
@@ -323,6 +413,7 @@ private fun EntryRow(
         } else {
             Spacer(modifier = Modifier.size(48.dp))
         }
+        category?.let { CategoryDot(it.color, modifier = Modifier.padding(start = 4.dp)) }
         Text(
             text = entry.routine.title,
             style = MaterialTheme.typography.bodyLarge,

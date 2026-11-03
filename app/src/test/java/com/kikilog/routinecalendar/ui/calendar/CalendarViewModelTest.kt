@@ -134,4 +134,25 @@ class CalendarViewModelTest {
 
         assertEquals(listOf(d("2026-11-02")), db.routineDao().completionsOf(id).map { it.doneOn })
     }
+
+    @Test
+    fun `칸의 분류는 분류당 하나씩 분류 순서대로`() = runTest {
+        // 오늘(11-03) 예정: 기타 2개 + 집안일 1개
+        add("여권", 7)
+        add("우산", 7)
+        repository.add(
+            RoutineDraft("청소기", Category.HOUSE, Interval(7, IntervalUnit.DAY), repeats = true, notify = true),
+            null,
+        )
+        val state = stateWhen { it.days[d("2026-11-03")]?.dueIds?.size == 3 }
+
+        val categories = state.categoriesOf(state.days.getValue(d("2026-11-03")).dueIds)
+        assertEquals(listOf(Category.HOUSE, Category.ETC), categories.map { it.id })
+    }
+
+    @Test
+    fun `설정을 넘기지 않으면 알림 카드는 보이지 않는다`() = runTest {
+        add("여권", 7)
+        assertEquals(false, stateWhen { it.entries.isNotEmpty() }.showNotifyCard)
+    }
 }
