@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Android 12 이상의 자동 백업 · 기기 간 이전 규칙.
-    - 루틴 DB(databases/ 전체: .db · -wal · -shm)와 설정(DataStore)만 넣는다. include 를 쓰면 나머지는 빠진다
+    - 루틴 DB(databases/ 전체: .db · -wal · -shm)와 설정 파일 하나만 넣는다. include 를 쓰면 나머지는 빠진다
+      -wal 에 최근 변경이 남아 있을 수 있어 DB 파일 하나만 넣지 않는다(2026-11-03 bmgr 시험에서 -wal 이 .db 보다 컸음)
+    - 같은 datastore/ 폴더의 Glance 위젯 내부 파일은 위젯 번호가 새 휴대폰과 맞지 않아 넣지 않는다
     - 클라우드 백업은 종단간 암호화가 될 때만(잠금 화면이 없는 휴대폰에서는 하지 않음). 개발자는 내용을 볼 수 없다
     - 가져오기 전 자동 저장 파일 · WorkManager DB 는 noBackupFilesDir 에 있어 백업되지 않는다
 -->
 <data-extraction-rules>
     <cloud-backup disableIfNoEncryptionCapabilities="true">
         <include domain="database" path="." />
-        <include domain="file" path="datastore/" />
+        <include domain="file" path="datastore/settings.preferences_pb" />
     </cloud-backup>
     <device-transfer>
         <include domain="database" path="." />
-        <include domain="file" path="datastore/" />
+        <include domain="file" path="datastore/settings.preferences_pb" />
     </device-transfer>
 </data-extraction-rules>
