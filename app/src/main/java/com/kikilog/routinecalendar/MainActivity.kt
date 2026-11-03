@@ -4,8 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.kikilog.routinecalendar.ui.navigation.RoutineCalendarRoot
+import com.kikilog.routinecalendar.ui.navigation.TopLevelTab
+import com.kikilog.routinecalendar.ui.navigation.toTab
 import com.kikilog.routinecalendar.ui.theme.RoutineCalendarTheme
+import kotlinx.coroutines.flow.first
 
 class MainActivity : ComponentActivity() {
 
@@ -16,7 +24,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RoutineCalendarTheme {
-                RoutineCalendarRoot()
+                // 첫 화면 설정은 켤 때 한 번 읽는다. 설정을 바꾸면 다음에 켤 때부터 적용된다
+                var startTab by rememberSaveable { mutableStateOf<TopLevelTab?>(null) }
+                LaunchedEffect(Unit) {
+                    if (startTab == null) startTab = container.settingsRepository.startScreen.first().toTab()
+                }
+                startTab?.let { RoutineCalendarRoot(startTab = it) }
             }
         }
     }

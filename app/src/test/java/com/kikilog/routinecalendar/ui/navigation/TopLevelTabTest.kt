@@ -29,6 +29,14 @@ class TopLevelTabTest {
     }
 
     @Test
+    fun `설정의 첫 화면을 탭으로`() {
+        assertEquals(TopLevelTab.TODAY, com.kikilog.routinecalendar.data.StartScreen.TODAY.toTab())
+        assertEquals(TopLevelTab.CALENDAR, com.kikilog.routinecalendar.data.StartScreen.CALENDAR.toTab())
+        assertEquals(TopLevelTab.ROUTINES, com.kikilog.routinecalendar.data.StartScreen.ROUTINES.toTab())
+        assertEquals(TopLevelTab.CALENDAR, com.kikilog.routinecalendar.data.DEFAULT_START_SCREEN.toTab())
+    }
+
+    @Test
     fun `탭은 오늘 · 캘린더 · 루틴 순서`() {
         assertEquals(listOf(TodayKey, CalendarKey, RoutinesKey), TopLevelTab.entries.map { it.key })
     }
