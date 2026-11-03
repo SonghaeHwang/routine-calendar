@@ -119,6 +119,13 @@
     <string name="settings_start_screen">첫 화면</string>
     <string name="settings_start_screen_hint">다음에 앱을 켤 때 처음 보이는 탭이에요</string>
 
+    <!-- 알림 -->
+    <string name="notify_channel_name">오늘 요약</string>
+    <string name="notify_channel_description">하루 한 번 오늘 할 루틴과 지난 루틴을 알려요</string>
+    <string name="notify_count_today">오늘 할 루틴 %1$d개</string>
+    <string name="notify_count_overdue">지난 것 %1$d개</string>
+    <string name="notify_line_overdue">(지남) %1$s</string>
+
     <!-- 빠른 선택 편집 -->
     <string name="preset_add">빠른 선택 추가</string>
     <string name="preset_edit">빠른 선택 수정</string>

@@ -1,12 +1,15 @@
 package com.kikilog.routinecalendar
 
 import android.content.Context
+import androidx.work.WorkManager
 import com.kikilog.routinecalendar.data.AppDatabase
 import com.kikilog.routinecalendar.data.PresetRepository
 import com.kikilog.routinecalendar.data.RoutineRepository
 import com.kikilog.routinecalendar.data.SettingsRepository
 import com.kikilog.routinecalendar.data.settingsDataStore
 import com.kikilog.routinecalendar.data.TodayClock
+import com.kikilog.routinecalendar.notify.DailySummarySender
+import com.kikilog.routinecalendar.notify.NotifyScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,5 +46,14 @@ class AppContainer(context: Context) {
             today = todayClock::current,
             now = System::currentTimeMillis,
         )
+    }
+
+    /** 하루 1회 요약 알림 예약. WorkManager 는 처음 예약할 때 가져온다 */
+    val notifyScheduler: NotifyScheduler by lazy {
+        NotifyScheduler(workManager = { WorkManager.getInstance(appContext) }, settings = settingsRepository)
+    }
+
+    val dailySummarySender: DailySummarySender by lazy {
+        DailySummarySender(appContext, routineRepository, settingsRepository, today = todayClock::current)
     }
 }

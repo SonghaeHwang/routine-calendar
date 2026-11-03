@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- 앱이 직접 선언하는 권한은 이것 하나. WorkManager 가 넣는 일반 권한은 병합으로 들어온다 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".RoutineCalendarApp"
         android:allowBackup="true"

@@ -9,11 +9,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
 import com.kikilog.routinecalendar.ui.navigation.RoutineCalendarRoot
 import com.kikilog.routinecalendar.ui.navigation.TopLevelTab
 import com.kikilog.routinecalendar.ui.navigation.toTab
 import com.kikilog.routinecalendar.ui.theme.RoutineCalendarTheme
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -22,6 +24,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // 알림이 켜져 있으면 다음 시각을 다시 지정한다(시간대가 바뀐 경우 등). 꺼져 있으면 아무것도 하지 않는다
+        if (savedInstanceState == null) {
+            lifecycleScope.launch { container.notifyScheduler.syncIfEnabled() }
+        }
         setContent {
             RoutineCalendarTheme {
                 // 첫 화면 설정은 켤 때 한 번 읽는다. 설정을 바꾸면 다음에 켤 때부터 적용된다
