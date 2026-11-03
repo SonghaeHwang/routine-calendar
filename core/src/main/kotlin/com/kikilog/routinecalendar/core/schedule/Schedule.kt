@@ -74,3 +74,30 @@ fun initialSchedule(
     val firstDue = if (repeats) today else interval.addTo(today)
     return InitialSchedule(firstDue = firstDue, initialDoneOn = null)
 }
+
+/**
+ * 등록 화면의 "루틴 시작일".
+ * - 오늘이거나 앞날이면 그날이 첫 예정일(반복 여부와 상관없이). 완료 기록은 남기지 않는다
+ * - 지난 날이면 그날 한 것으로 보고 [initialSchedule] 의 "마지막으로 한 날" 과 같게 계산한다
+ */
+fun startSchedule(
+    interval: Interval,
+    repeats: Boolean,
+    today: LocalDate,
+    start: LocalDate,
+): InitialSchedule =
+    if (start >= today) {
+        InitialSchedule(firstDue = start, initialDoneOn = null)
+    } else {
+        initialSchedule(interval, repeats, today, lastDoneOn = start)
+    }
+
+/**
+ * 다음 예정일부터 [count] 개(루틴 정보 화면의 미리보기). 반복하지 않으면 많아야 1개, 끝났으면 빈 목록.
+ * [occurrencesIn] 과 같이 다음 예정일에 `주기 × k` 를 더해 월말이 밀리지 않는다.
+ */
+fun nextDueDates(routine: Routine, completions: Collection<Completion>, count: Int = 3): List<LocalDate> {
+    val start = nextDue(routine, completions) ?: return emptyList()
+    if (!routine.repeats) return listOf(start)
+    return (0 until count).map { k -> routine.interval.addTo(start, k) }
+}

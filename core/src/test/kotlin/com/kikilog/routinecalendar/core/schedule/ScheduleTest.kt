@@ -221,4 +221,53 @@ class ScheduleTest {
     fun `등록 - 마지막으로 한 날이 미래면 거부`() {
         initialSchedule(Interval(1, WEEK), repeats = true, today = d("2026-11-02"), lastDoneOn = d("2026-11-03"))
     }
+
+    // ── startSchedule (루틴 시작일) ──
+
+    @Test
+    fun `시작일 - 오늘이면 오늘이 첫 예정일, 기록 없음`() {
+        val s = startSchedule(Interval(1, WEEK), repeats = true, today = d("2026-11-03"), start = d("2026-11-03"))
+        assertEquals(InitialSchedule(firstDue = d("2026-11-03"), initialDoneOn = null), s)
+    }
+
+    @Test
+    fun `시작일 - 앞날이면 그날이 첫 예정일, 반복 없음도 같다`() {
+        assertEquals(
+            InitialSchedule(firstDue = d("2026-11-10"), initialDoneOn = null),
+            startSchedule(Interval(1, WEEK), repeats = true, today = d("2026-11-03"), start = d("2026-11-10")),
+        )
+        assertEquals(
+            InitialSchedule(firstDue = d("2027-01-01"), initialDoneOn = null),
+            startSchedule(Interval(2, MONTH), repeats = false, today = d("2026-11-03"), start = d("2027-01-01")),
+        )
+    }
+
+    @Test
+    fun `시작일 - 지난 날이면 그날 한 것으로 보고 주기를 더한다`() {
+        val s = startSchedule(Interval(10, DAY), repeats = true, today = d("2026-11-03"), start = d("2026-10-28"))
+        assertEquals(InitialSchedule(firstDue = d("2026-11-07"), initialDoneOn = d("2026-10-28")), s)
+    }
+
+    // ── nextDueDates (예정일 미리보기) ──
+
+    @Test
+    fun `미리보기 - 다음 예정일부터 3개, 월말이 밀리지 않는다`() {
+        assertEquals(
+            listOf(d("2027-01-31"), d("2027-02-28"), d("2027-03-31")),
+            nextDueDates(routine(1, MONTH, "2027-01-31"), emptyList()),
+        )
+        assertEquals(
+            listOf(d("2026-11-09"), d("2026-11-16"), d("2026-11-23")),
+            nextDueDates(routine(1, WEEK, "2026-10-01"), listOf(done("2026-11-02"))),
+        )
+    }
+
+    @Test
+    fun `미리보기 - 반복 없음은 한 번, 끝났으면 없음`() {
+        assertEquals(listOf(d("2026-12-01")), nextDueDates(routine(2, MONTH, "2026-12-01", repeats = false), emptyList()))
+        assertEquals(
+            emptyList<LocalDate>(),
+            nextDueDates(routine(2, MONTH, "2026-12-01", repeats = false), listOf(done("2026-11-02"))),
+        )
+    }
 }
