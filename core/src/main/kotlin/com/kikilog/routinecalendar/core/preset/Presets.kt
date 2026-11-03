@@ -8,13 +8,16 @@ import com.kikilog.routinecalendar.core.model.IntervalUnit.WEEK
 
 /**
  * 등록 화면의 빠른 선택. 고르면 값이 입력 칸에 복사되고 사용자가 고칠 수 있다.
+ * 목록 자체도 설정에서 고칠 수 있어 저장소에 둔다. [DEFAULT_PRESETS] 는 처음 채우는 값이다.
  * @property interval null 이면 주기를 직접 입력한다(리들샷)
+ * @property id 저장소의 번호. 기본값 목록은 0
  */
 data class Preset(
     val title: String,
     val category: Category,
     val interval: Interval?,
     val repeats: Boolean = true,
+    val id: Long = 0,
 )
 
 /** PLAN.md "프리셋" 표. 분류 순서(집안일 → 뷰티 → 구매)대로 화면에 보인다. */

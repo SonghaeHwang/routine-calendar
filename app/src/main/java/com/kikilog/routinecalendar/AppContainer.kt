@@ -3,6 +3,7 @@ package com.kikilog.routinecalendar
 import android.content.Context
 import com.kikilog.routinecalendar.core.schedule.DEFAULT_WEEK_START
 import com.kikilog.routinecalendar.data.AppDatabase
+import com.kikilog.routinecalendar.data.PresetRepository
 import com.kikilog.routinecalendar.data.RoutineRepository
 import com.kikilog.routinecalendar.data.TodayClock
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,8 @@ class AppContainer(context: Context) {
 
     /** 주 시작 요일. 4단계에서 DataStore 설정으로 바꾼다. */
     val weekStart: Flow<DayOfWeek> = flowOf(DEFAULT_WEEK_START)
+
+    val presetRepository: PresetRepository by lazy { PresetRepository(database.presetDao()) }
 
     val routineRepository: RoutineRepository by lazy {
         RoutineRepository(
