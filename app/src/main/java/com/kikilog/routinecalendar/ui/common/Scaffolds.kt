@@ -28,6 +28,7 @@ fun TabScaffold(
     title: String,
     onOpenSettings: () -> Unit,
     floatingActionButton: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
@@ -35,6 +36,7 @@ fun TabScaffold(
             TopAppBar(
                 title = { Text(title) },
                 actions = {
+                    actions()
                     IconButton(onClick = onOpenSettings) {
                         Icon(painterResource(R.drawable.ic_settings), contentDescription = stringResource(R.string.settings))
                     }

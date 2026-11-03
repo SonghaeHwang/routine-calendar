@@ -54,7 +54,13 @@ import com.kikilog.routinecalendar.core.model.Category
 import com.kikilog.routinecalendar.core.model.IntervalUnit
 import com.kikilog.routinecalendar.core.preset.DEFAULT_PRESETS
 import com.kikilog.routinecalendar.core.preset.Preset
+import com.kikilog.routinecalendar.ui.common.ConfirmDeleteDialog
+import com.kikilog.routinecalendar.ui.common.RoutineActionsMenu
 import com.kikilog.routinecalendar.ui.common.SubScaffold
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.res.painterResource
 import com.kikilog.routinecalendar.ui.format.categoryLabel
 import com.kikilog.routinecalendar.ui.format.formatDate
 import com.kikilog.routinecalendar.ui.format.pickerMillisToDate
@@ -77,11 +83,11 @@ fun EditRoutineRoute(
     val viewModel: EditRoutineViewModel = viewModel(factory = EditRoutineViewModel.factory(routineId))
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state.saved, state.notFound) {
+    LaunchedEffect(state.saved, state.notFound, state.closed) {
         val nextDue = state.savedNextDue
         when {
-            // 없는 루틴(이미 삭제됨)을 열면 돌아간다
-            state.notFound -> onBack()
+            // 없는 루틴(이미 삭제됨)을 열었거나, 보관 · 삭제했으면 돌아간다
+            state.notFound || state.closed -> onBack()
             !state.saved -> Unit
             state.isEdit -> onEdited()
             nextDue != null -> onAdded(state.title.trim(), nextDue, state.today)
@@ -102,6 +108,8 @@ fun EditRoutineRoute(
         onPreset = viewModel::applyPreset,
         onSave = viewModel::save,
         onSaveFailedShown = viewModel::onSaveFailedShown,
+        onToggleArchive = viewModel::onToggleArchive,
+        onDelete = viewModel::onDelete,
     )
 }
 
@@ -120,7 +128,11 @@ fun EditRoutineScreen(
     onPreset: (Preset) -> Unit,
     onSave: () -> Unit,
     onSaveFailedShown: () -> Unit,
+    onToggleArchive: () -> Unit,
+    onDelete: () -> Unit,
 ) {
+    var menuOpen by rememberSaveable { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val saveFailedMessage = stringResource(R.string.error_save_failed)
     LaunchedEffect(state.saveFailed) {
@@ -134,7 +146,33 @@ fun EditRoutineScreen(
         title = stringResource(if (state.isEdit) R.string.edit_routine else R.string.add_routine),
         onBack = onBack,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        actions = {
+            if (state.isEdit && !state.isLoading) {
+                Box {
+                    IconButton(onClick = { menuOpen = true }) {
+                        Icon(painterResource(R.drawable.ic_more), contentDescription = stringResource(R.string.more))
+                    }
+                    RoutineActionsMenu(
+                        expanded = menuOpen,
+                        archived = state.archived,
+                        onDismiss = { menuOpen = false },
+                        onToggleArchive = onToggleArchive,
+                        onDelete = { confirmDelete = true },
+                    )
+                }
+            }
+        },
     ) { padding ->
+        if (confirmDelete) {
+            ConfirmDeleteDialog(
+                title = state.title,
+                onConfirm = {
+                    confirmDelete = false
+                    onDelete()
+                },
+                onDismiss = { confirmDelete = false },
+            )
+        }
         // 수정할 루틴을 불러오는 짧은 동안은 빈 칸을 보여 주지 않는다
         if (state.isLoading || state.notFound) return@SubScaffold
         Column(

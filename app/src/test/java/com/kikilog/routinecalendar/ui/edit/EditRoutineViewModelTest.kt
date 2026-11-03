@@ -249,6 +249,27 @@ class EditRoutineViewModelTest {
     }
 
     @Test
+    fun `수정 화면 메뉴로 보관하면 보관되고 화면이 닫힌다`() = runTest {
+        val id = addRoutine("젤팩", 1, IntervalUnit.WEEK)
+        val vm = editViewModel(id)
+        assertFalse(vm.state.value.archived)
+
+        vm.onToggleArchive()
+        assertTrue(vm.state.first { it.closed }.archived)
+        assertTrue(savedRoutines().single().routine.archived)
+    }
+
+    @Test
+    fun `수정 화면 메뉴로 삭제하면 지워지고 화면이 닫힌다`() = runTest {
+        val id = addRoutine("젤팩", 1, IntervalUnit.WEEK, lastDoneOn = "2026-11-01")
+        val vm = editViewModel(id)
+
+        vm.onDelete()
+        vm.state.first { it.closed }
+        assertEquals(emptyList<Any>(), savedRoutines())
+    }
+
+    @Test
     fun `없는 루틴을 열면 notFound`() = runTest {
         val vm = EditRoutineViewModel(repository, today = { today }, routineId = 999)
         assertTrue(vm.state.first { !it.isLoading }.notFound)

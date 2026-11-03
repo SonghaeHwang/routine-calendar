@@ -60,6 +60,7 @@ class EditRoutineViewModel(
                     hasCompletions = hasCompletions,
                     repeatsLocked = hasCompletions && routine.repeats,
                     firstDue = routine.firstDue,
+                    archived = routine.archived,
                 )
             }
         }
@@ -99,6 +100,25 @@ class EditRoutineViewModel(
     }
 
     fun onSaveFailedShown() = _state.update { it.copy(saveFailed = false) }
+
+    /** 수정 모드 더보기: 보관 · 보관 해제. 끝나면 화면을 닫는다 */
+    fun onToggleArchive() {
+        val id = _state.value.routineId ?: return
+        val archive = !_state.value.archived
+        viewModelScope.launch {
+            repository.setArchived(id, archive)
+            _state.update { it.copy(archived = archive, closed = true) }
+        }
+    }
+
+    /** 수정 모드 더보기: 삭제(확인 대화상자를 거친 뒤). 끝나면 화면을 닫는다 */
+    fun onDelete() {
+        val id = _state.value.routineId ?: return
+        viewModelScope.launch {
+            repository.delete(id)
+            _state.update { it.copy(closed = true) }
+        }
+    }
 
     fun save() {
         val current = _state.value

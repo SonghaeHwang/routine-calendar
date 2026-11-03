@@ -57,6 +57,15 @@
     <string name="routine_never_done">아직 기록 없음</string>
     <string name="routine_next_due">다음: %1$s</string>
     <string name="routine_ended">끝남</string>
+    <string name="routine_archived">보관됨</string>
+    <string name="routine_menu_label">보관 · 삭제 메뉴 열기</string>
+    <string name="show_archived">보관한 루틴 보기</string>
+    <string name="hide_archived">보관한 루틴 숨기기</string>
+    <string name="action_archive">보관</string>
+    <string name="action_unarchive">보관 해제</string>
+    <string name="action_delete">삭제</string>
+    <string name="delete_title">%1$s 삭제할까요?</string>
+    <string name="delete_body">완료 기록도 모두 지워지고 되돌릴 수 없어요. 잠시 안 할 루틴이라면 보관을 써 보세요. 보관하면 오늘 화면에서만 빠지고 기록은 남아요.</string>
 
     <!-- 분류 -->
     <string name="category_house">집안일</string>

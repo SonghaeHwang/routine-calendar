@@ -24,6 +24,7 @@ data class RoutinesUiState(
     val isLoading: Boolean = true,
     val today: LocalDate? = null,
     val rows: List<RoutineRow> = emptyList(),
+    val showArchived: Boolean = false,
 )
 
 /** 다음 예정일 순, 끝난 것은 맨 아래. 같으면 이름 · id 순. */

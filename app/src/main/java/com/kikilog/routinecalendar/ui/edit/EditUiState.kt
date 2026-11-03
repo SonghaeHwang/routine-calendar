@@ -28,6 +28,10 @@ data class EditUiState(
     val hasCompletions: Boolean = false,
     val repeatsLocked: Boolean = false,
     val firstDue: LocalDate? = null,
+    /** 수정 중인 루틴이 보관됐는지(더보기 메뉴 문구에 쓴다) */
+    val archived: Boolean = false,
+    /** 보관 · 삭제로 화면을 닫아야 할 때 */
+    val closed: Boolean = false,
     val title: String = "",
     val category: Category = Category.HOUSE,
     val amountText: String = "1",
