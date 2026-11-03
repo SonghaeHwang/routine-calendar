@@ -146,11 +146,26 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
   - 휴대폰 확인: 월 이동, 11월 3일 예정 4개 · 2일 완료 1개가 오늘 화면과 같음, 월요일로 바꾸면 캘린더가 월~일로 바로 바뀜(확인 뒤 일요일로 되돌림)
   - 커밋 전마다 규칙 검사(rule-checker 지시문을 일반 에이전트에 넘겨 실행) — 모두 통과, 새 의존성 · 권한 없음
   - 시험: `:app` 120개 모두 통과(CalendarViewModelTest 6 · SettingsViewModelTest 3 · SettingsRepositoryTest 3 추가)
+- **PLAN 5단계 — 알림** (코드 완료, 휴대폰 확인 남음)
+  - 사전 조사(`docs/notes/notify.md`)의 열린 질문 7개를 Plan 모드에서 물어 정함(기본 오전 8:00 · 30분 단위 · 0개면 안 보냄 · 늦어도 보냄 · 잠금 화면은 개수만 등)
+  - ① WorkManager 2.12.0 ② `:core` 다음 알림 시각 · 요약 대상 ③ DataStore 알림 설정 ④⑤ 채널 · 알림 · Worker · 예약(24시간 주기 + 다음 시각 지정) ⑥ 설정 스위치 · 시각 · 「알림 켤까요?」 카드 ⑦ 알림을 누르면 앱으로
+  - 병합 Manifest: 앱이 선언한 권한은 `POST_NOTIFICATIONS` 하나, WorkManager 가 일반 권한 4개를 넣음. `INTERNET` 없음
+  - 사용자가 휴대폰에서 알림을 켜고 시각을 오후 2:00 으로 두고 확인 중
+- **사용자 수정 요청 8가지** (5단계 도중, Plan 모드로 계획 → 질문 7개 → 9단위 커밋)
+  - `:core` 루틴 시작일(`startSchedule`) · 예정일 미리보기(`nextDueDates`)
+  - 분류를 고정 enum 에서 `category` 테이블로(DB 버전 3). 색 계열 9 × 5단계, 기본 집안일 초록 · 뷰티 분홍 · 구매 파랑 · 기타 회색
+  - 분류 편집 화면(추가 · 이름 · 색 · 삭제 시 기타로 이동), 빠른 선택을 꾹 눌러 다른 분류로 끌어 옮기기
+  - 루틴 정보 화면(루틴 탭 누르기 · 달력 꾹 누르기 → 「편집하기」)
+  - 달력: 이름 변경 · 좌우로 밀어 달 이동 · 분류당 색 점(최대 4, 놓친 것 빨간 테두리, 한 것 같은 색 ✓)
+  - 오늘 탭 숨김(코드 보존). 알림을 누르면 달력, 알림 카드도 달력으로
+  - 등록 화면 「마지막으로 한 날」 → 「루틴 시작일」(기본 오늘, 앞날 가능)
+  - 휴대폰 확인: 업데이트 뒤 기존 루틴의 분류가 그대로(마이그레이션 2→3), 빠른 선택 끌어 옮기기, 달력 색 점 · 밀어서 다음 달 · 꾹 눌러 루틴 정보, 하단 탭 2개
+  - 시험: `:core` · `:app` 모두 통과(새 시험 CategoryTest · CategoryRepositoryTest · CategoriesViewModelTest · RoutineInfoViewModelTest · 마이그레이션 2→3 등)
 
 ### 진행 중
 
 - PLAN 3단계 완료 기준: 실제 루틴 5개 이상으로 사흘 써 보기(11-03 시작). 끝나면 3단계 체크
-- 다음: PLAN 5단계(알림) 세부 계획
+- PLAN 5단계 ⑧ 휴대폰 확인: 알림 도착 시각 · 잠금 화면 · 재부팅 뒤 유지 · 거절 뒤 정상. 끝나면 5단계 체크
 - 보류: 오늘 화면에서 체크한 줄을 원래 칸(지난 것 · 다가오는 7일)에 남길지 — 요청 후 "변경하지 말 것" 으로 보류. 지금은 체크하면 "오늘" 칸에 체크된 채로 남는다
 
 ### 막힌 점
@@ -180,9 +195,24 @@ Routine Calendar 를 만들며 한 일을 날짜별로 남긴다. 형식: 한 �
   - `LocalContext.current` 로 문자열을 읽으면 Lint 오류(설정 변경에 둔감) → `stringResource` 로 틀을 미리 읽어 `format`
   - 규칙 검사 에이전트를 부르면 `Agent type 'rule-checker' not found` → 이 세션에 등록되지 않아서. `.claude/agents/rule-checker.md` 지시문을 일반 에이전트에 넘겨 같은 검사를 돌림
   - 빌드 파일을 바꾼 뒤 배포하면 `Gradle sync needed for this project.` → Gradle 동기화 후 다시 배포
+- **분류 색 표가 초기화되다 멈춤**
+  - 증상: `CategoryTest` 전부 `java.lang.ExceptionInInitializerError` / `Caused by: java.lang.NullPointerException at CategoryTest.kt:21`
+  - 원인: `ColorFamily` enum 과 `DEFAULT_CATEGORIES` 를 한 파일에 두었다. enum 생성자가 같은 파일의 `argb()` 를 부르면 파일 클래스가 먼저 초기화되고, 그때 `DEFAULT_CATEGORIES` 가 아직 만들어지는 중인 `ColorFamily.GREEN`(null)을 읽음
+  - 해결: `ColorFamily` 를 `ColorFamily.kt` 로 따로 분리
+- **DB 2→3 마이그레이션에서 기록이 지워질 위험(미리 막음)**
+  - 원인: `routine` 테이블을 다시 만들려고 `DROP TABLE routine` 을 하면, 외래 키(completion → routine, ON DELETE CASCADE)가 켜져 있을 때 완료 기록이 함께 지워질 수 있다. SQLite 3.18(API 26)은 `DROP COLUMN` 도 없다
+  - 해결: 루틴 · 기록을 백업 테이블로 복사 → completion → routine 순서로 지우고 다시 만든 뒤 복사. 시험으로 기록이 남는 것을 확인
+- **등록 화면 시험이 가끔 실패**
+  - 증상: `java.lang.IllegalStateException: Dispatchers.Main is used concurrently with setting it`(tearDown 의 `resetMain`), 뒤따라 `UninitializedPropertyAccessException: lateinit property db has not been initialized`
+  - 원인: ViewModel 이 모으는 Room Flow 가 백그라운드 스레드에서 Main 으로 돌아오는 순간과 시험 끝의 `resetMain` 이 겹침
+  - 해결: 그 시험의 Room 을 `setQueryExecutor { it.run() }` · `setTransactionExecutor { it.run() }` 로 같은 스레드에서 돌림
+- **빠른 선택을 끌었는데 엉뚱한 분류에 놓임**(휴대폰)
+  - 증상: 「분리수거」를 뷰티로 끌었는데 구매로 옮겨짐
+  - 원인: 손가락이 화면 아래 가장자리(12%) 안에 머물러 자동 스크롤이 계속됨
+  - 해결: 가장자리 8%, 속도 24 → 10px. 옮긴 항목은 집안일로 되돌림(끝 자리로 감)
 
 ### 메모
 
 - 휴대폰 화면을 캡처할 때 알림창이 내려와 있으면 알림 내용이 찍힌다. 캡처 전에 미리 알리고, 찍힌 내용은 기록하지 않는다
-- 탭 역할: 캘린더(첫 화면, 4단계에서 내용) · 오늘(지금 할 일을 체크하는 화면) · 루틴(등록한 루틴 전체를 관리하는 화면)
+- 탭 역할: 달력(첫 화면, 예전 이름 캘린더) · 루틴(등록한 루틴 전체를 관리하는 화면). 오늘 탭은 숨김(코드 보존)
 - 일하는 방식: 단계마다 시험 → 커밋 → 푸시를 묻지 않고 이어서 진행, 휴대폰이 필요할 때만 멈춤

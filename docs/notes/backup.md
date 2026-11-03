@@ -72,6 +72,7 @@ suspend fun read(resolver: ContentResolver, uri: Uri): String = withContext(Disp
 - **DB `id` 를 넣지 않는다.** 완료 기록을 루틴 안에 중첩하면 `routine_id` 가 필요 없고, 가져올 때 새 id 로 넣은 뒤 그 id 로 완료 기록을 넣으면 된다(ID 재매핑이 저절로 해결). Room 스키마 버전과 백업 `schemaVersion` 은 **따로** 관리한다(DB 버전이 올라도 JSON 형식이 같으면 1 유지).
 - 시각은 기존 결정대로 epoch millis `Long`(`kotlin.time.Instant` opt-in 회피). enum 은 이름 문자열(`Category` 주석: "이름은 바꾸지 않는다" 와 맞음).
 - DTO 는 `backup/` 에 따로 둔다(엔티티 · `:core` 모델에 `@Serializable` 를 붙이지 않음 — 저장 형식과 파일 형식을 분리).
+- **2026-11-03 바뀜 (DB 버전 3):** 분류가 고정 enum 에서 사용자가 고치는 `category` 테이블(이름 · 색 · 순서)로 바뀌었다. 위 예시의 `"category": "HOUSE"` 는 더 이상 맞지 않는다. 7단계에서는 최상위에 `"categories": [{ "key": 1, "name", "color", "position", "removable" }]` 를 두고 루틴 · 빠른 선택은 그 `key` 로 가리키게 한다(루틴과 같은 방식으로 가져올 때 id 재매핑). 설정도 알림 켜기 · 시각이 더해졌다.
 
 ### LocalDate 직렬화
 
