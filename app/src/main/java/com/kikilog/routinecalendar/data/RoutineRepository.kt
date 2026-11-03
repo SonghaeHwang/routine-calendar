@@ -1,6 +1,7 @@
 package com.kikilog.routinecalendar.data
 
 import com.kikilog.routinecalendar.core.schedule.initialSchedule
+import com.kikilog.routinecalendar.core.schedule.startSchedule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
@@ -37,6 +38,23 @@ class RoutineRepository(
             initialDoneOn = schedule.initialDoneOn,
             createdAt = createdAt,
         )
+    }
+
+    /**
+     * 등록 화면의 "루틴 시작일" 로 등록. 오늘 · 앞날이면 그날이 첫 예정일,
+     * 지난 날이면 그날 한 것으로 보고 [add] 의 "마지막으로 한 날" 과 같게 저장한다.
+     * @return 새 루틴 id 와 첫 예정일
+     */
+    suspend fun addStartingOn(draft: RoutineDraft, start: LocalDate): Pair<Long, LocalDate> {
+        val valid = draft.validated()
+        val schedule = startSchedule(valid.interval, valid.repeats, today(), start)
+        val createdAt = now()
+        val id = dao.insertWithInitialCompletion(
+            routine = valid.toEntity(schedule.firstDue, createdAt),
+            initialDoneOn = schedule.initialDoneOn,
+            createdAt = createdAt,
+        )
+        return id to schedule.firstDue
     }
 
     /**

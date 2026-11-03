@@ -11,7 +11,6 @@ import com.kikilog.routinecalendar.core.model.DEFAULT_CATEGORIES
 import com.kikilog.routinecalendar.core.model.IntervalUnit
 import com.kikilog.routinecalendar.core.preset.DEFAULT_PRESETS
 import com.kikilog.routinecalendar.core.preset.Preset
-import com.kikilog.routinecalendar.core.schedule.initialSchedule
 import com.kikilog.routinecalendar.data.RoutineDraft
 import com.kikilog.routinecalendar.data.RoutineRepository
 import com.kikilog.routinecalendar.ui.format.epochMillisToLocalDate
@@ -112,10 +111,8 @@ class EditRoutineViewModel(
 
     fun onNotifyChange(notify: Boolean) = _state.update { it.copy(notify = notify) }
 
-    /** 오늘 이후 날짜는 무시한다(날짜 선택기에서도 막지만 한 번 더) */
-    fun onLastDoneChange(date: LocalDate?) = _state.update {
-        if (date != null && date > it.today) it else it.copy(lastDoneOn = date)
-    }
+    /** 등록 화면의 루틴 시작일. 지난 날 · 오늘 · 앞날 모두 고를 수 있다 */
+    fun onStartDateChange(date: LocalDate) = _state.update { it.copy(startDate = date) }
 
     /** 수정 모드에서 기록이 없을 때만. 과거 · 미래 모두 고를 수 있다 */
     fun onFirstDueChange(date: LocalDate) = _state.update { if (it.hasCompletions) it else it.copy(firstDue = date) }
@@ -190,9 +187,8 @@ class EditRoutineViewModel(
             val id = current.routineId
             runCatching {
                 if (id == null) {
-                    repository.add(draft, current.lastDoneOn)
                     // 등록 직후에는 다음 예정일 = 첫 예정일
-                    initialSchedule(interval, current.repeats, current.today, current.lastDoneOn).firstDue
+                    repository.addStartingOn(draft, current.startDate).second
                 } else {
                     repository.update(id, draft, firstDue = current.firstDue.takeIf { !current.hasCompletions })
                     null

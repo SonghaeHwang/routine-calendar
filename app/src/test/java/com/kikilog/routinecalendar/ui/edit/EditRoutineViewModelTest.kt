@@ -40,6 +40,10 @@ class EditRoutineViewModelTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), AppDatabase::class.java)
             .allowMainThreadQueries()
+            // Room 의 백그라운드 스레드에서 Main 으로 돌아오는 동안 tearDown 의 resetMain 이 겹치면
+            // 「Dispatchers.Main is used concurrently with setting it」 으로 가끔 실패해서, 시험에서는 같은 스레드로 돈다
+            .setQueryExecutor { it.run() }
+            .setTransactionExecutor { it.run() }
             .build()
         repository = RoutineRepository(db.routineDao(), today = { today }, now = { 1_000L })
         viewModel = EditRoutineViewModel(repository, today = { today })
@@ -65,7 +69,7 @@ class EditRoutineViewModelTest {
         assertEquals(IntervalUnit.WEEK, state.unit)
         assertTrue(state.repeats)
         assertTrue(state.notify)
-        assertNull(state.lastDoneOn)
+        assertEquals(today, state.startDate)
         assertFalse(state.showErrors)
     }
 
@@ -137,21 +141,31 @@ class EditRoutineViewModelTest {
     }
 
     @Test
-    fun `미래 날짜는 마지막으로 한 날로 받지 않는다`() {
-        viewModel.onLastDoneChange(LocalDate.parse("2026-11-03"))
-        assertNull(state.lastDoneOn)
+    fun `시작일은 지난 날 · 앞날 모두 고를 수 있다`() {
+        viewModel.onStartDateChange(LocalDate.parse("2026-11-20"))
+        assertEquals(LocalDate.parse("2026-11-20"), state.startDate)
 
-        viewModel.onLastDoneChange(LocalDate.parse("2026-10-20"))
-        assertEquals(LocalDate.parse("2026-10-20"), state.lastDoneOn)
-
-        viewModel.onLastDoneChange(null)
-        assertNull(state.lastDoneOn)
+        viewModel.onStartDateChange(LocalDate.parse("2026-10-20"))
+        assertEquals(LocalDate.parse("2026-10-20"), state.startDate)
     }
 
     @Test
-    fun `프리셋 + 마지막으로 한 날로 저장하면 첫 예정일과 기록이 저장된다`() = runTest {
+    fun `앞날을 시작일로 저장하면 그날이 첫 예정일이고 기록은 없다`() = runTest {
+        viewModel.applyPreset(preset("젤팩"))
+        viewModel.onStartDateChange(LocalDate.parse("2026-11-10"))
+        viewModel.save()
+
+        viewModel.state.first { it.saved }
+        val saved = savedRoutines().single()
+        assertEquals(LocalDate.parse("2026-11-10"), saved.routine.firstDue)
+        assertTrue(saved.completions.isEmpty())
+        assertEquals(LocalDate.parse("2026-11-10"), state.savedNextDue)
+    }
+
+    @Test
+    fun `프리셋 + 지난 날 시작일로 저장하면 그날 한 것으로 보고 첫 예정일과 기록이 저장된다`() = runTest {
         viewModel.applyPreset(preset("각질제거"))
-        viewModel.onLastDoneChange(LocalDate.parse("2026-10-20"))
+        viewModel.onStartDateChange(LocalDate.parse("2026-10-20"))
         viewModel.save()
 
         viewModel.state.first { it.saved }
@@ -165,13 +179,14 @@ class EditRoutineViewModelTest {
     }
 
     @Test
-    fun `직접 입력해 반복 없이 저장하면 오늘 + 주기가 첫 예정일`() = runTest {
+    fun `직접 입력해 반복 없이 저장하면 시작일이 첫 예정일`() = runTest {
         viewModel.onTitleChange("화장지")
         viewModel.onCategoryChange(Category.SUPPLY)
         viewModel.onAmountChange("2")
         viewModel.onUnitChange(IntervalUnit.MONTH)
         viewModel.onRepeatsChange(false)
         viewModel.onNotifyChange(false)
+        viewModel.onStartDateChange(LocalDate.parse("2027-01-02"))
         viewModel.save()
 
         viewModel.state.first { it.saved }

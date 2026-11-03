@@ -57,7 +57,8 @@ data class EditUiState(
     val unit: IntervalUnit = IntervalUnit.WEEK,
     val repeats: Boolean = true,
     val notify: Boolean = true,
-    val lastDoneOn: LocalDate? = null,
+    /** 등록할 때의 루틴 시작일. 오늘 · 앞날이면 첫 예정일, 지난 날이면 그날 한 것으로 본다 */
+    val startDate: LocalDate = today,
     val showErrors: Boolean = false,
     val isSaving: Boolean = false,
     val saved: Boolean = false,

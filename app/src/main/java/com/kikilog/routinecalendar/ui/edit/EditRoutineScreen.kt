@@ -23,7 +23,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
@@ -111,7 +110,7 @@ fun EditRoutineRoute(
         onUnitChange = viewModel::onUnitChange,
         onRepeatsChange = viewModel::onRepeatsChange,
         onNotifyChange = viewModel::onNotifyChange,
-        onLastDoneChange = viewModel::onLastDoneChange,
+        onStartDateChange = viewModel::onStartDateChange,
         onFirstDueChange = viewModel::onFirstDueChange,
         onPreset = viewModel::applyPreset,
         onSave = viewModel::save,
@@ -135,7 +134,7 @@ fun EditRoutineScreen(
     onUnitChange: (IntervalUnit) -> Unit,
     onRepeatsChange: (Boolean) -> Unit,
     onNotifyChange: (Boolean) -> Unit,
-    onLastDoneChange: (LocalDate?) -> Unit,
+    onStartDateChange: (LocalDate) -> Unit,
     onFirstDueChange: (LocalDate) -> Unit,
     onPreset: (Preset) -> Unit,
     onSave: () -> Unit,
@@ -311,13 +310,11 @@ fun EditRoutineScreen(
 
             if (!state.isEdit) {
                 DateField(
-                    title = stringResource(R.string.label_last_done),
-                    date = state.lastDoneOn,
+                    title = stringResource(R.string.label_start_date),
+                    date = state.startDate,
                     today = state.today,
-                    emptyText = stringResource(R.string.last_done_none),
-                    hint = stringResource(R.string.last_done_hint),
-                    allowFuture = false,
-                    onChange = onLastDoneChange,
+                    hint = stringResource(R.string.start_date_hint),
+                    onChange = onStartDateChange,
                 )
             } else if (!state.hasCompletions) {
                 state.firstDue?.let { firstDue ->
@@ -325,11 +322,8 @@ fun EditRoutineScreen(
                         title = stringResource(R.string.label_first_due),
                         date = firstDue,
                         today = state.today,
-                        emptyText = "",
                         hint = stringResource(R.string.first_due_hint),
-                        allowFuture = true,
-                        onChange = { it?.let(onFirstDueChange) },
-                        clearable = false,
+                        onChange = onFirstDueChange,
                     )
                 }
             }
@@ -386,32 +380,21 @@ private fun PresetSection(presets: List<Preset>, categories: List<Category>, onP
     }
 }
 
-/**
- * 날짜 하나를 고르는 칸. 누르면 날짜 선택기가 열린다.
- * @param allowFuture false 면 오늘 이후는 고를 수 없다(마지막으로 한 날)
- */
+/** 날짜 하나를 고르는 칸. 누르면 날짜 선택기가 열린다. 지난 날 · 앞날 모두 고를 수 있다 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DateField(
     title: String,
-    date: LocalDate?,
+    date: LocalDate,
     today: LocalDate,
-    emptyText: String,
     hint: String,
-    allowFuture: Boolean,
-    onChange: (LocalDate?) -> Unit,
-    clearable: Boolean = true,
+    onChange: (LocalDate) -> Unit,
 ) {
     var showPicker by rememberSaveable { mutableStateOf(false) }
 
     Section(title) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedButton(onClick = { showPicker = true }, modifier = Modifier.weight(1f)) {
-                Text(date?.let { formatDate(it, today) } ?: emptyText)
-            }
-            if (clearable && date != null) {
-                TextButton(onClick = { onChange(null) }) { Text(stringResource(R.string.clear)) }
-            }
+        OutlinedButton(onClick = { showPicker = true }, modifier = Modifier.fillMaxWidth()) {
+            Text(formatDate(date, today))
         }
         Text(
             text = hint,
@@ -421,13 +404,7 @@ private fun DateField(
     }
 
     if (showPicker) {
-        val todayMillis = today.toPickerMillis()
-        val pickerState = rememberDatePickerState(
-            initialSelectedDateMillis = (date ?: today).toPickerMillis(),
-            selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean = allowFuture || utcTimeMillis <= todayMillis
-            },
-        )
+        val pickerState = rememberDatePickerState(initialSelectedDateMillis = date.toPickerMillis())
         DatePickerDialog(
             onDismissRequest = { showPicker = false },
             confirmButton = {

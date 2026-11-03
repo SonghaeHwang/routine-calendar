@@ -26,8 +26,8 @@
     <string name="repeats_on_hint">한 뒤에도 주기마다 다시 해요</string>
     <string name="repeats_off_hint">주기가 지나면 한 번만 하고 끝나요</string>
     <string name="label_last_done">마지막으로 한 날</string>
-    <string name="last_done_none">선택 안 함</string>
-    <string name="last_done_hint">넣으면 그날부터 주기를 계산해요. 비우면 오늘부터 시작해요</string>
+    <string name="label_start_date">루틴 시작일</string>
+    <string name="start_date_hint">오늘이나 앞날이면 그날이 첫 예정일이에요. 지난 날이면 그날 한 것으로 보고 주기를 더해요</string>
     <string name="label_notify">알림에 넣기</string>
     <string name="notify_hint">하루 한 번 오는 요약 알림에 넣어요</string>
     <string name="error_title_empty">이름을 입력해 주세요</string>
