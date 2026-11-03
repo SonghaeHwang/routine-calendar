@@ -80,7 +80,9 @@ fun RoutineCalendarRoot(startTab: TopLevelTab = DEFAULT_START_TAB) {
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                entry<TodayKey> { TodayRoute(onAdd = { openEdit(null) }, onOpenSettings = openSettings) }
+                entry<TodayKey> {
+                    TodayRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)
+                }
                 entry<CalendarKey> { CalendarPlaceholder(onOpenSettings = openSettings) }
                 entry<RoutinesKey> {
                     RoutinesRoute(onAdd = { openEdit(null) }, onOpen = { id -> openEdit(id) }, onOpenSettings = openSettings)

@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,16 +39,17 @@ import com.kikilog.routinecalendar.ui.format.overdueLabel
 import kotlinx.datetime.LocalDate
 
 @Composable
-fun TodayRoute(onAdd: () -> Unit, onOpenSettings: () -> Unit) {
+fun TodayRoute(onAdd: () -> Unit, onOpen: (Long) -> Unit, onOpenSettings: () -> Unit) {
     val viewModel: TodayViewModel = viewModel(factory = TodayViewModel.Factory)
     val state by viewModel.state.collectAsStateWithLifecycle()
-    TodayScreen(state = state, onToggle = viewModel::onToggle, onAdd = onAdd, onOpenSettings = onOpenSettings)
+    TodayScreen(state = state, onToggle = viewModel::onToggle, onOpen = onOpen, onAdd = onAdd, onOpenSettings = onOpenSettings)
 }
 
 @Composable
 fun TodayScreen(
     state: TodayUiState,
     onToggle: (TodayEntry) -> Unit,
+    onOpen: (Long) -> Unit,
     onAdd: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
@@ -68,9 +72,9 @@ fun TodayScreen(
                     bottom = padding.calculateBottomPadding() + 88.dp,
                 ),
             ) {
-                section(R.string.section_overdue, state.board.overdue, today, onToggle)
-                section(R.string.section_today, state.board.dueToday, today, onToggle)
-                section(R.string.section_upcoming, state.board.upcoming, today, onToggle)
+                section(R.string.section_overdue, state.board.overdue, today, onToggle, onOpen)
+                section(R.string.section_today, state.board.dueToday, today, onToggle, onOpen)
+                section(R.string.section_upcoming, state.board.upcoming, today, onToggle, onOpen)
             }
         }
     }
@@ -81,6 +85,7 @@ private fun LazyListScope.section(
     entries: List<TodayEntry>,
     today: LocalDate,
     onToggle: (TodayEntry) -> Unit,
+    onOpen: (Long) -> Unit,
 ) {
     if (entries.isEmpty()) return
     item(key = "header-$titleRes") {
@@ -94,18 +99,28 @@ private fun LazyListScope.section(
         )
     }
     items(entries, key = { "$titleRes-${it.routine.id}" }) { entry ->
-        TodayRow(entry = entry, today = today, onToggle = { onToggle(entry) })
+        TodayRow(entry = entry, today = today, onToggle = { onToggle(entry) }, onOpen = { onOpen(entry.routine.id) })
     }
 }
 
-/** 줄 전체를 눌러 체크한다(체크 칸만이 아니라). 최소 높이 56dp. */
+/**
+ * 줄 전체를 눌러 체크한다(체크 칸만이 아니라). 꼭 누르면 수정 화면. 최소 높이 56dp.
+ * 화면 읽기 기능에는 체크박스로 읽히고, 길게 누르기 설명이 붙는다.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TodayRow(entry: TodayEntry, today: LocalDate, onToggle: () -> Unit) {
+private fun TodayRow(entry: TodayEntry, today: LocalDate, onToggle: () -> Unit, onOpen: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .toggleable(value = entry.doneToday, role = Role.Checkbox, onValueChange = { onToggle() })
+            .combinedClickable(
+                role = Role.Checkbox,
+                onClick = onToggle,
+                onLongClick = onOpen,
+                onLongClickLabel = stringResource(R.string.edit_routine),
+            )
+            .semantics { toggleableState = ToggleableState(entry.doneToday) }
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
