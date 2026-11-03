@@ -85,7 +85,7 @@ class EditRoutineViewModelTest {
         viewModel.applyPreset(preset("이불 세탁"))
 
         assertEquals("이불 세탁", state.title)
-        assertEquals(Category.HOUSE, state.category)
+        assertEquals(Category.HOUSE, state.categoryId)
         assertEquals("2", state.amountText)
         assertEquals(IntervalUnit.MONTH, state.unit)
         assertEquals(Interval(2, IntervalUnit.MONTH), state.interval)
@@ -96,7 +96,7 @@ class EditRoutineViewModelTest {
         viewModel.applyPreset(preset("리들샷"))
 
         assertEquals("리들샷", state.title)
-        assertEquals(Category.BEAUTY, state.category)
+        assertEquals(Category.BEAUTY, state.categoryId)
         assertEquals("", state.amountText)
         assertEquals(AmountError.INVALID, state.amountError)
     }
@@ -176,7 +176,7 @@ class EditRoutineViewModelTest {
 
         viewModel.state.first { it.saved }
         val saved = savedRoutines().single().routine
-        assertEquals(Category.SUPPLY, saved.category)
+        assertEquals(Category.SUPPLY, saved.categoryId)
         assertFalse(saved.repeats)
         assertFalse(saved.notify)
         assertEquals(LocalDate.parse("2027-01-02"), saved.firstDue)
@@ -207,7 +207,7 @@ class EditRoutineViewModelTest {
         val s = vm.state.value
         assertTrue(s.isEdit)
         assertEquals("젤팩", s.title)
-        assertEquals(Category.BEAUTY, s.category)
+        assertEquals(Category.BEAUTY, s.categoryId)
         assertEquals("1", s.amountText)
         assertEquals(IntervalUnit.WEEK, s.unit)
         assertTrue(s.repeats)

@@ -11,7 +11,7 @@ import kotlinx.datetime.LocalDate
 data class RoutineRow(
     val id: Long,
     val title: String,
-    val category: Category,
+    val categoryId: Long,
     val interval: Interval,
     val repeats: Boolean,
     val lastDoneOn: LocalDate?,
@@ -25,6 +25,8 @@ data class RoutinesUiState(
     val today: LocalDate? = null,
     val rows: List<RoutineRow> = emptyList(),
     val showArchived: Boolean = false,
+    /** 줄의 분류 이름 · 색 */
+    val categories: List<Category> = emptyList(),
     /** 선택 모드에서 고른 루틴. 비어 있으면 선택 모드가 아니다 */
     val selectedIds: Set<Long> = emptySet(),
 ) {
@@ -38,7 +40,7 @@ fun buildRoutineRows(items: List<RoutineWithCompletions>): List<RoutineRow> =
             RoutineRow(
                 id = routine.id,
                 title = routine.title,
-                category = routine.category,
+                categoryId = routine.categoryId,
                 interval = routine.interval,
                 repeats = routine.repeats,
                 lastDoneOn = lastDoneOn(routine, completions),

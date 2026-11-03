@@ -14,7 +14,7 @@ class PresetsTest {
 
     @Test
     fun `PLAN 표와 같은 개수 - 집안일 7 · 뷰티 4 · 구매 3`() {
-        val counts = DEFAULT_PRESETS.groupingBy { it.category }.eachCount()
+        val counts = DEFAULT_PRESETS.groupingBy { it.categoryId }.eachCount()
         assertEquals(mapOf(Category.HOUSE to 7, Category.BEAUTY to 4, Category.SUPPLY to 3), counts)
     }
 
@@ -25,9 +25,9 @@ class PresetsTest {
 
     @Test
     fun `분류 순서대로 놓인다`() {
-        val order = DEFAULT_PRESETS.map { it.category }.distinct()
+        val order = DEFAULT_PRESETS.map { it.categoryId }.distinct()
         assertEquals(listOf(Category.HOUSE, Category.BEAUTY, Category.SUPPLY), order)
-        assertEquals(DEFAULT_PRESETS.map { it.category }, DEFAULT_PRESETS.map { it.category }.sortedBy { order.indexOf(it) })
+        assertEquals(DEFAULT_PRESETS.map { it.categoryId }, DEFAULT_PRESETS.map { it.categoryId }.sortedBy { order.indexOf(it) })
     }
 
     @Test

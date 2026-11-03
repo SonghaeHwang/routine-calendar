@@ -44,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kikilog.routinecalendar.R
+import com.kikilog.routinecalendar.ui.common.CategoryChips
+import com.kikilog.routinecalendar.ui.common.CategoryDot
+import com.kikilog.routinecalendar.ui.common.color
 import com.kikilog.routinecalendar.core.model.Category
 import com.kikilog.routinecalendar.core.model.IntervalUnit
 import com.kikilog.routinecalendar.core.preset.Preset
@@ -52,7 +55,6 @@ import com.kikilog.routinecalendar.ui.common.EmptyState
 import com.kikilog.routinecalendar.ui.common.SubScaffold
 import com.kikilog.routinecalendar.ui.common.unitLabel
 import com.kikilog.routinecalendar.ui.edit.AmountError
-import com.kikilog.routinecalendar.ui.format.categoryLabel
 import com.kikilog.routinecalendar.ui.format.intervalLabel
 
 @Composable
@@ -112,16 +114,11 @@ fun PresetsScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
             ) {
-                state.presets.groupBy { it.category }.forEach { (category, group) ->
-                    item(key = "header-$category") {
-                        Text(
-                            text = categoryLabel(category),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
-                                .semantics { heading() },
-                        )
+                val groups = state.presets.groupBy { it.categoryId }
+                state.categories.forEach { category ->
+                    val group = groups[category.id].orEmpty()
+                    item(key = "header-${category.id}") {
+                        CategoryHeader(category)
                     }
                     items(group, key = { it.id }) { preset ->
                         PresetRow(
@@ -139,6 +136,7 @@ fun PresetsScreen(
     editing?.let { form ->
         PresetDialog(
             initial = form,
+            categories = state.categories,
             onDismiss = { editing = null },
             onSave = { edited -> if (onSave(edited)) editing = null },
         )
@@ -160,6 +158,26 @@ fun PresetsScreen(
     }
 }
 
+/** 분류 머리글(색 점 + 이름) */
+@Composable
+private fun CategoryHeader(category: Category, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
+            .semantics { heading() },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CategoryDot(category.color)
+        Text(
+            text = category.name,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 8.dp),
+        )
+    }
+}
+
 @Composable
 private fun PresetRow(preset: Preset, onClick: () -> Unit, onDelete: () -> Unit) {
     ListItem(
@@ -176,7 +194,12 @@ private fun PresetRow(preset: Preset, onClick: () -> Unit, onDelete: () -> Unit)
 
 /** 빠른 선택 하나를 더하거나 고치는 대화상자. 저장을 누른 뒤부터 오류를 보여 준다. */
 @Composable
-private fun PresetDialog(initial: PresetForm, onDismiss: () -> Unit, onSave: (PresetForm) -> Unit) {
+private fun PresetDialog(
+    initial: PresetForm,
+    categories: List<Category>,
+    onDismiss: () -> Unit,
+    onSave: (PresetForm) -> Unit,
+) {
     var form by remember(initial) { mutableStateOf(initial) }
     var showErrors by remember(initial) { mutableStateOf(false) }
 
@@ -201,11 +224,10 @@ private fun PresetDialog(initial: PresetForm, onDismiss: () -> Unit, onSave: (Pr
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )
-                ChoiceRow(
-                    options = Category.entries,
-                    selected = form.category,
-                    onSelect = { form = form.copy(category = it) },
-                    label = { categoryLabel(it) },
+                CategoryChips(
+                    categories = categories,
+                    selectedId = form.categoryId,
+                    onSelect = { form = form.copy(categoryId = it) },
                 )
                 Row(verticalAlignment = Alignment.Top) {
                     OutlinedTextField(

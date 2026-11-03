@@ -1,6 +1,7 @@
 package com.kikilog.routinecalendar.ui.edit
 
 import com.kikilog.routinecalendar.core.model.Category
+import com.kikilog.routinecalendar.core.model.DEFAULT_CATEGORIES
 import com.kikilog.routinecalendar.core.model.Interval
 import com.kikilog.routinecalendar.core.model.IntervalUnit
 import com.kikilog.routinecalendar.core.preset.Preset
@@ -40,6 +41,8 @@ data class EditUiState(
     val closed: Boolean = false,
     /** 등록 화면 위쪽 빠른 선택(설정에서 편집한 목록) */
     val presets: List<Preset> = emptyList(),
+    /** 고를 수 있는 분류(설정 · 분류 편집에서 바뀐 목록) */
+    val categories: List<Category> = DEFAULT_CATEGORIES,
     /** 자기 자신을 뺀 다른 루틴들. 같은 이름 안내에 쓴다 */
     val others: List<NamedRoutine> = emptyList(),
     /** 등록할 때 같은 이름이 있어 확인 창을 띄울지 */
@@ -49,7 +52,7 @@ data class EditUiState(
     /** 확인 창에서 「기존 루틴 열기」를 골랐을 때 그 루틴 */
     val openExistingId: Long? = null,
     val title: String = "",
-    val category: Category = Category.HOUSE,
+    val categoryId: Long = Category.HOUSE,
     val amountText: String = "1",
     val unit: IntervalUnit = IntervalUnit.WEEK,
     val repeats: Boolean = true,

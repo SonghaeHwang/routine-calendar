@@ -25,7 +25,7 @@ class RoutineRowsTest {
         routine = Routine(
             id = id,
             title = title,
-            category = Category.ETC,
+            categoryId = Category.ETC,
             interval = Interval(7, IntervalUnit.DAY),
             repeats = repeats,
             firstDue = d(firstDue),

@@ -15,7 +15,7 @@ import com.kikilog.routinecalendar.ui.edit.TitleError
 data class PresetForm(
     val id: Long? = null,
     val title: String = "",
-    val category: Category = Category.HOUSE,
+    val categoryId: Long = Category.HOUSE,
     val amountText: String = "1",
     val unit: IntervalUnit = IntervalUnit.WEEK,
     val repeats: Boolean = true,
@@ -39,14 +39,14 @@ data class PresetForm(
     fun toPresetOrNull(): Preset? {
         if (!isValid) return null
         val interval = amountText.toIntOrNull()?.let { Interval(it, unit) }
-        return Preset(title = title.trim(), category = category, interval = interval, repeats = repeats, id = id ?: 0)
+        return Preset(title = title.trim(), categoryId = categoryId, interval = interval, repeats = repeats, id = id ?: 0)
     }
 
     companion object {
         fun from(preset: Preset): PresetForm = PresetForm(
             id = preset.id,
             title = preset.title,
-            category = preset.category,
+            categoryId = preset.categoryId,
             amountText = preset.interval?.amount?.toString() ?: "",
             unit = preset.interval?.unit ?: IntervalUnit.WEEK,
             repeats = preset.repeats,

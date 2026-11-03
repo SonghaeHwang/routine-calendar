@@ -27,7 +27,7 @@ class TodayBoardTest {
     ) = Routine(
         id = id,
         title = title,
-        category = Category.ETC,
+        categoryId = Category.ETC,
         interval = Interval(amount, IntervalUnit.DAY),
         repeats = repeats,
         firstDue = d(firstDue),

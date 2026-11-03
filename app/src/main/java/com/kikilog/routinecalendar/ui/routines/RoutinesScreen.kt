@@ -37,7 +37,10 @@ import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.ui.common.AddRoutineButton
 import com.kikilog.routinecalendar.ui.common.EmptyState
 import com.kikilog.routinecalendar.ui.common.TabScaffold
-import com.kikilog.routinecalendar.ui.format.categoryLabel
+import com.kikilog.routinecalendar.core.model.Category
+import com.kikilog.routinecalendar.ui.common.CategoryDot
+import com.kikilog.routinecalendar.ui.common.byId
+import com.kikilog.routinecalendar.ui.common.color
 import com.kikilog.routinecalendar.ui.format.formatDate
 import com.kikilog.routinecalendar.ui.format.intervalLabel
 import kotlinx.datetime.LocalDate
@@ -157,6 +160,7 @@ fun RoutinesScreen(
                 items(state.rows, key = { it.id }) { row ->
                     RoutineRowItem(
                         row = row,
+                        category = state.categories.byId(row.categoryId),
                         today = today,
                         selecting = state.isSelecting,
                         selected = row.id in state.selectedIds,
@@ -201,6 +205,7 @@ fun RoutinesScreen(
 @Composable
 private fun RoutineRowItem(
     row: RoutineRow,
+    category: Category?,
     today: LocalDate,
     selecting: Boolean,
     selected: Boolean,
@@ -215,10 +220,11 @@ private fun RoutineRowItem(
                 onLongClickLabel = stringResource(R.string.routine_select_label),
             )
             .alpha(if (row.archived) 0.6f else 1f),
+        // 선택 모드면 체크 칸, 아니면 분류 색 점
         leadingContent = if (selecting) {
             { Checkbox(checked = selected, onCheckedChange = null) }
         } else {
-            null
+            category?.let { { CategoryDot(it.color, size = 12.dp) } }
         },
         headlineContent = {
             Text(
@@ -227,7 +233,8 @@ private fun RoutineRowItem(
         },
         supportingContent = {
             Column(modifier = Modifier.padding(top = 2.dp)) {
-                Text("${categoryLabel(row.category)} · ${intervalLabel(row.interval, row.repeats)}")
+                val interval = intervalLabel(row.interval, row.repeats)
+                Text(category?.let { "${it.name} · $interval" } ?: interval)
                 Text(
                     text = row.lastDoneOn?.let { stringResource(R.string.routine_last_done, formatDate(it, today)) }
                         ?: stringResource(R.string.routine_never_done),

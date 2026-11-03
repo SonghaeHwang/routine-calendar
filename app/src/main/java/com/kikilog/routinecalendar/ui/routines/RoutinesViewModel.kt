@@ -6,9 +6,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kikilog.routinecalendar.RoutineCalendarApp
+import com.kikilog.routinecalendar.core.model.Category
+import com.kikilog.routinecalendar.core.model.DEFAULT_CATEGORIES
 import com.kikilog.routinecalendar.data.RoutineRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -26,6 +30,7 @@ import kotlinx.datetime.LocalDate
 class RoutinesViewModel(
     private val repository: RoutineRepository,
     today: StateFlow<LocalDate>,
+    categories: Flow<List<Category>> = flowOf(DEFAULT_CATEGORIES),
 ) : ViewModel() {
 
     private val showArchived = MutableStateFlow(false)
@@ -37,13 +42,15 @@ class RoutinesViewModel(
             today,
             showArchived,
             selected,
-        ) { items, date, archivedShown, selectedIds ->
+            categories,
+        ) { items, date, archivedShown, selectedIds, cats ->
             val rows = buildRoutineRows(items)
             RoutinesUiState(
                 isLoading = false,
                 today = date,
                 rows = rows,
                 showArchived = archivedShown,
+                categories = cats,
                 // 지워졌거나 숨겨진 루틴은 선택에서 뺀다
                 selectedIds = selectedIds intersect rows.map { it.id }.toSet(),
             )
@@ -89,7 +96,11 @@ class RoutinesViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as RoutineCalendarApp).container
-                RoutinesViewModel(container.routineRepository, container.todayClock.today)
+                RoutinesViewModel(
+                    container.routineRepository,
+                    container.todayClock.today,
+                    container.categoryRepository.observeCategories(),
+                )
             }
         }
     }

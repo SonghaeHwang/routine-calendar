@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kikilog.routinecalendar.RoutineCalendarApp
 import com.kikilog.routinecalendar.core.model.Category
+import com.kikilog.routinecalendar.core.model.DEFAULT_CATEGORIES
 import com.kikilog.routinecalendar.core.model.IntervalUnit
 import com.kikilog.routinecalendar.core.preset.DEFAULT_PRESETS
 import com.kikilog.routinecalendar.core.preset.Preset
@@ -33,6 +34,7 @@ class EditRoutineViewModel(
     today: () -> LocalDate,
     routineId: Long? = null,
     presets: Flow<List<Preset>> = flowOf(DEFAULT_PRESETS),
+    categories: Flow<List<Category>> = flowOf(DEFAULT_CATEGORIES),
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -45,6 +47,15 @@ class EditRoutineViewModel(
         // 빠른 선택은 등록할 때만 쓴다. 설정에서 바꾸면 바로 반영된다
         if (routineId == null) {
             viewModelScope.launch { presets.collect { list -> _state.update { it.copy(presets = list) } } }
+        }
+        // 분류를 지우면 고른 분류가 사라질 수 있다 → 저장소가 항목을 기타로 옮기므로 화면도 기타로
+        viewModelScope.launch {
+            categories.collect { list ->
+                _state.update { s ->
+                    val id = if (list.any { it.id == s.categoryId }) s.categoryId else Category.ETC
+                    s.copy(categories = list, categoryId = id)
+                }
+            }
         }
         // 같은 이름 안내용: 보관한 것까지 포함한 다른 루틴 이름
         viewModelScope.launch {
@@ -70,7 +81,7 @@ class EditRoutineViewModel(
                 it.copy(
                     isLoading = false,
                     title = routine.title,
-                    category = routine.category,
+                    categoryId = routine.categoryId,
                     amountText = routine.interval.amount.toString(),
                     unit = routine.interval.unit,
                     repeats = routine.repeats,
@@ -89,7 +100,7 @@ class EditRoutineViewModel(
         it.copy(title = title.take(MAX_TITLE_LENGTH), duplicateConfirmed = false)
     }
 
-    fun onCategoryChange(category: Category) = _state.update { it.copy(category = category) }
+    fun onCategoryChange(categoryId: Long) = _state.update { it.copy(categoryId = categoryId) }
 
     /** 숫자만 받고, 세 자리까지 */
     fun onAmountChange(text: String) = _state.update { it.copy(amountText = text.filter(Char::isDigit).take(3)) }
@@ -113,7 +124,7 @@ class EditRoutineViewModel(
     fun applyPreset(preset: Preset) = _state.update {
         it.copy(
             title = preset.title,
-            category = preset.category,
+            categoryId = preset.categoryId,
             amountText = preset.interval?.amount?.toString() ?: "",
             unit = preset.interval?.unit ?: it.unit,
             repeats = preset.repeats,
@@ -171,7 +182,7 @@ class EditRoutineViewModel(
         viewModelScope.launch {
             val draft = RoutineDraft(
                 title = current.title,
-                category = current.category,
+                categoryId = current.categoryId,
                 interval = interval,
                 repeats = current.repeats,
                 notify = current.notify,
@@ -203,6 +214,7 @@ class EditRoutineViewModel(
                     today = container.todayClock::current,
                     routineId = routineId,
                     presets = container.presetRepository.observePresets(),
+                    categories = container.categoryRepository.observeCategories(),
                 )
             }
         }

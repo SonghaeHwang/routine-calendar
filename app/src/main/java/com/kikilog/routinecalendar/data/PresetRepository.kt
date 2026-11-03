@@ -24,6 +24,13 @@ class PresetRepository(private val dao: PresetDao) {
 
     suspend fun delete(id: Long): Boolean = dao.delete(id) > 0
 
+    /** 다른 분류로 옮긴다(빠른 선택 편집에서 끌어 놓기). 그 분류의 끝에 보이도록 순서를 맨 뒤로 */
+    suspend fun move(id: Long, categoryId: Long): Boolean {
+        val current = dao.byId(id) ?: return false
+        if (current.categoryId == categoryId) return false
+        return dao.update(current.copy(categoryId = categoryId, position = dao.maxPosition() + 1)) > 0
+    }
+
     /** 처음 14개로 되돌린다. 사용자가 더하거나 고친 항목은 사라진다 */
     suspend fun resetToDefaults() = dao.replaceAll(defaultPresetEntities())
 
@@ -43,7 +50,7 @@ class PresetRepository(private val dao: PresetDao) {
 
 fun PresetEntity.toModel(): Preset = Preset(
     title = title,
-    category = category,
+    categoryId = categoryId,
     interval = if (intervalAmount != null && intervalUnit != null) Interval(intervalAmount, intervalUnit) else null,
     repeats = repeats,
     id = id,
@@ -52,7 +59,7 @@ fun PresetEntity.toModel(): Preset = Preset(
 fun Preset.toEntity(position: Int): PresetEntity = PresetEntity(
     id = id,
     title = title,
-    category = category,
+    categoryId = categoryId,
     intervalAmount = interval?.amount,
     intervalUnit = interval?.unit,
     repeats = repeats,

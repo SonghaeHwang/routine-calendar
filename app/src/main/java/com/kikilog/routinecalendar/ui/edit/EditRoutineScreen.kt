@@ -49,6 +49,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kikilog.routinecalendar.R
 import com.kikilog.routinecalendar.core.model.Category
+import com.kikilog.routinecalendar.ui.common.CategoryChips
+import com.kikilog.routinecalendar.ui.common.CategoryDot
+import com.kikilog.routinecalendar.ui.common.color
 import com.kikilog.routinecalendar.core.model.IntervalUnit
 import com.kikilog.routinecalendar.core.preset.Preset
 import com.kikilog.routinecalendar.ui.common.ChoiceRow
@@ -60,7 +63,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.painterResource
-import com.kikilog.routinecalendar.ui.format.categoryLabel
 import com.kikilog.routinecalendar.ui.format.formatDate
 import com.kikilog.routinecalendar.ui.format.pickerMillisToDate
 import com.kikilog.routinecalendar.ui.format.toPickerMillis
@@ -126,7 +128,7 @@ fun EditRoutineScreen(
     state: EditUiState,
     onBack: () -> Unit,
     onTitleChange: (String) -> Unit,
-    onCategoryChange: (Category) -> Unit,
+    onCategoryChange: (Long) -> Unit,
     onAmountChange: (String) -> Unit,
     onUnitChange: (IntervalUnit) -> Unit,
     onRepeatsChange: (Boolean) -> Unit,
@@ -212,7 +214,7 @@ fun EditRoutineScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (!state.isEdit && state.presets.isNotEmpty()) {
-                PresetSection(state.presets, onPreset)
+                PresetSection(state.presets, state.categories, onPreset)
                 HorizontalDivider()
             }
 
@@ -243,11 +245,10 @@ fun EditRoutineScreen(
             )
 
             Section(stringResource(R.string.label_category)) {
-                ChoiceRow(
-                    options = Category.entries,
-                    selected = state.category,
+                CategoryChips(
+                    categories = state.categories,
+                    selectedId = state.categoryId,
                     onSelect = onCategoryChange,
-                    label = { categoryLabel(it) },
                 )
             }
 
@@ -358,14 +359,20 @@ fun EditRoutineScreen(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PresetSection(presets: List<Preset>, onPreset: (Preset) -> Unit) {
+private fun PresetSection(presets: List<Preset>, categories: List<Category>, onPreset: (Preset) -> Unit) {
     Section(stringResource(R.string.label_presets)) {
-        presets.groupBy { it.category }.forEach { (category, group) ->
-            Text(
-                text = categoryLabel(category),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        // 분류 편집 순서대로. 빈 분류는 건너뛴다
+        val groups = presets.groupBy { it.categoryId }
+        categories.mapNotNull { c -> groups[c.id]?.let { c to it } }.forEach { (category, group) ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CategoryDot(category.color, size = 8.dp)
+                Text(
+                    text = category.name,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 6.dp),
+                )
+            }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 group.forEach { preset ->
                     SuggestionChip(onClick = { onPreset(preset) }, label = { Text(preset.title) })

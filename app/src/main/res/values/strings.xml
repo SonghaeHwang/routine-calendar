@@ -82,10 +82,7 @@
     <string name="delete_body">완료 기록도 모두 지워지고 되돌릴 수 없어요. 잠시 안 할 루틴이라면 보관을 써 보세요. 보관하면 오늘 화면에서만 빠지고 기록은 남아요.</string>
 
     <!-- 분류 -->
-    <string name="category_house">집안일</string>
-    <string name="category_beauty">뷰티</string>
-    <string name="category_supply">구매</string>
-    <string name="category_etc">기타</string>
+    <string name="categories_edit">분류 편집</string>
 
     <!-- 주기 -->
     <string name="interval_every_day">%1$d일마다</string>

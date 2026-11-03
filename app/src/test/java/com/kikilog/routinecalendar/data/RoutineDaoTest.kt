@@ -40,7 +40,7 @@ class RoutineDaoTest {
 
     private fun routine(title: String = "각질제거", archived: Boolean = false) = RoutineEntity(
         title = title,
-        category = Category.BEAUTY,
+        categoryId = Category.BEAUTY,
         intervalAmount = 10,
         intervalUnit = IntervalUnit.DAY,
         repeats = true,
@@ -160,7 +160,7 @@ class RoutineDaoTest {
         val edit = RoutineEditColumns(
             id = id,
             title = "젤팩",
-            category = Category.HOUSE,
+            categoryId = Category.HOUSE,
             intervalAmount = 2,
             intervalUnit = IntervalUnit.WEEK,
             repeats = false,
@@ -174,7 +174,7 @@ class RoutineDaoTest {
             routine(archived = true).copy(
                 id = id,
                 title = "젤팩",
-                category = Category.HOUSE,
+                categoryId = Category.HOUSE,
                 intervalAmount = 2,
                 intervalUnit = IntervalUnit.WEEK,
                 repeats = false,

@@ -8,7 +8,7 @@ import kotlinx.datetime.LocalDate
 fun RoutineEntity.toModel(): Routine = Routine(
     id = id,
     title = title,
-    category = category,
+    categoryId = categoryId,
     interval = Interval(intervalAmount, intervalUnit),
     repeats = repeats,
     firstDue = firstDue,
@@ -31,7 +31,7 @@ fun RoutineWithCompletionsRow.toModel(): RoutineWithCompletions = RoutineWithCom
 
 fun RoutineDraft.toEntity(firstDue: LocalDate, createdAt: Long): RoutineEntity = RoutineEntity(
     title = title,
-    category = category,
+    categoryId = categoryId,
     intervalAmount = interval.amount,
     intervalUnit = interval.unit,
     repeats = repeats,
@@ -44,7 +44,7 @@ fun RoutineDraft.toEntity(firstDue: LocalDate, createdAt: Long): RoutineEntity =
 fun RoutineDraft.toEditColumns(id: Long): RoutineEditColumns = RoutineEditColumns(
     id = id,
     title = title,
-    category = category,
+    categoryId = categoryId,
     intervalAmount = interval.amount,
     intervalUnit = interval.unit,
     repeats = repeats,

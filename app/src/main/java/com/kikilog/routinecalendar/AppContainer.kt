@@ -3,6 +3,7 @@ package com.kikilog.routinecalendar
 import android.content.Context
 import androidx.work.WorkManager
 import com.kikilog.routinecalendar.data.AppDatabase
+import com.kikilog.routinecalendar.data.CategoryRepository
 import com.kikilog.routinecalendar.data.PresetRepository
 import com.kikilog.routinecalendar.data.RoutineRepository
 import com.kikilog.routinecalendar.data.SettingsRepository
@@ -39,6 +40,8 @@ class AppContainer(context: Context) {
     val weekStart: Flow<DayOfWeek> get() = settingsRepository.weekStart
 
     val presetRepository: PresetRepository by lazy { PresetRepository(database.presetDao()) }
+
+    val categoryRepository: CategoryRepository by lazy { CategoryRepository(database.categoryDao()) }
 
     val routineRepository: RoutineRepository by lazy {
         RoutineRepository(

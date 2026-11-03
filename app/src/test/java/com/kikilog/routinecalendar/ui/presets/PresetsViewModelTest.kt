@@ -56,7 +56,7 @@ class PresetsViewModelTest {
 
     @Test
     fun `새 항목을 저장하면 끝에 붙는다`() = runTest {
-        assertTrue(viewModel.save(PresetForm(title = "손톱 정리", category = Category.BEAUTY, amountText = "2", unit = IntervalUnit.WEEK)))
+        assertTrue(viewModel.save(PresetForm(title = "손톱 정리", categoryId = Category.BEAUTY, amountText = "2", unit = IntervalUnit.WEEK)))
         assertEquals("손톱 정리", presets { it.presets.size == 15 }.last().title)
     }
 

@@ -17,7 +17,7 @@ class MappersTest {
     private val entity = RoutineEntity(
         id = 7,
         title = "이불 세탁",
-        category = Category.HOUSE,
+        categoryId = Category.HOUSE,
         intervalAmount = 2,
         intervalUnit = IntervalUnit.MONTH,
         repeats = true,
@@ -33,7 +33,7 @@ class MappersTest {
             Routine(
                 id = 7,
                 title = "이불 세탁",
-                category = Category.HOUSE,
+                categoryId = Category.HOUSE,
                 interval = Interval(2, IntervalUnit.MONTH),
                 repeats = true,
                 firstDue = d("2026-11-06"),

@@ -28,7 +28,7 @@ class DailySummaryTest {
     ) = Routine(
         id = id,
         title = "루틴$id",
-        category = Category.ETC,
+        categoryId = Category.ETC,
         interval = Interval(7, IntervalUnit.DAY),
         repeats = true,
         firstDue = d(firstDue),

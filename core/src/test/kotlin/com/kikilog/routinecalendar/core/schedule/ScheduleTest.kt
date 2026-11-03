@@ -26,7 +26,7 @@ class ScheduleTest {
     ) = Routine(
         id = id,
         title = "루틴",
-        category = Category.ETC,
+        categoryId = Category.ETC,
         interval = Interval(amount, unit),
         repeats = repeats,
         firstDue = d(firstDue),

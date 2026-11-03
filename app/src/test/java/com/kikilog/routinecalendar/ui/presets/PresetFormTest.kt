@@ -14,7 +14,7 @@ class PresetFormTest {
 
     @Test
     fun `이름과 주기가 있으면 프리셋으로 바뀐다 - 앞뒤 공백 제거`() {
-        val preset = PresetForm(title = " 손톱 정리 ", category = Category.BEAUTY, amountText = "2", unit = IntervalUnit.WEEK).toPresetOrNull()
+        val preset = PresetForm(title = " 손톱 정리 ", categoryId = Category.BEAUTY, amountText = "2", unit = IntervalUnit.WEEK).toPresetOrNull()
         assertEquals(Preset("손톱 정리", Category.BEAUTY, Interval(2, IntervalUnit.WEEK)), preset)
     }
 

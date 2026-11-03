@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.kikilog.routinecalendar.R
-import com.kikilog.routinecalendar.core.model.Category
 import com.kikilog.routinecalendar.core.model.Interval
 import com.kikilog.routinecalendar.core.model.IntervalUnit
 
@@ -18,16 +17,6 @@ fun intervalLabel(interval: Interval, repeats: Boolean): String {
     }
     return stringResource(res, interval.amount)
 }
-
-@Composable
-fun categoryLabel(category: Category): String = stringResource(
-    when (category) {
-        Category.HOUSE -> R.string.category_house
-        Category.BEAUTY -> R.string.category_beauty
-        Category.SUPPLY -> R.string.category_supply
-        Category.ETC -> R.string.category_etc
-    },
-)
 
 /** "3일 지남" */
 @Composable
