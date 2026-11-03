@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -77,9 +78,15 @@ fun EditRoutineRoute(
     onBack: () -> Unit,
     onAdded: (title: String, nextDue: LocalDate, today: LocalDate) -> Unit,
     onEdited: () -> Unit,
+    onOpenExisting: (Long) -> Unit,
 ) {
     val viewModel: EditRoutineViewModel = viewModel(factory = EditRoutineViewModel.factory(routineId))
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // 같은 이름 확인 창에서 「기존 루틴 열기」
+    LaunchedEffect(state.openExistingId) {
+        state.openExistingId?.let(onOpenExisting)
+    }
 
     LaunchedEffect(state.saved, state.notFound, state.closed) {
         val nextDue = state.savedNextDue
@@ -108,6 +115,9 @@ fun EditRoutineRoute(
         onSaveFailedShown = viewModel::onSaveFailedShown,
         onToggleArchive = viewModel::onToggleArchive,
         onDelete = viewModel::onDelete,
+        onAddAnyway = viewModel::onAddAnyway,
+        onOpenExistingDuplicate = viewModel::onOpenExisting,
+        onDismissDuplicate = viewModel::onDismissDuplicate,
     )
 }
 
@@ -128,6 +138,9 @@ fun EditRoutineScreen(
     onSaveFailedShown: () -> Unit,
     onToggleArchive: () -> Unit,
     onDelete: () -> Unit,
+    onAddAnyway: () -> Unit,
+    onOpenExistingDuplicate: () -> Unit,
+    onDismissDuplicate: () -> Unit,
 ) {
     var menuOpen by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
@@ -161,6 +174,22 @@ fun EditRoutineScreen(
             }
         },
     ) { padding ->
+        if (state.askDuplicate) {
+            AlertDialog(
+                onDismissRequest = onDismissDuplicate,
+                title = { Text(stringResource(R.string.duplicate_title, state.title.trim())) },
+                text = { Text(stringResource(R.string.duplicate_body)) },
+                confirmButton = {
+                    TextButton(onClick = onAddAnyway) { Text(stringResource(R.string.duplicate_add_anyway)) }
+                },
+                dismissButton = {
+                    Row {
+                        TextButton(onClick = onDismissDuplicate) { Text(stringResource(R.string.cancel)) }
+                        TextButton(onClick = onOpenExistingDuplicate) { Text(stringResource(R.string.duplicate_open)) }
+                    }
+                },
+            )
+        }
         if (confirmDelete) {
             ConfirmDeleteDialog(
                 title = state.title,
@@ -193,10 +222,22 @@ fun EditRoutineScreen(
                 label = { Text(stringResource(R.string.label_title)) },
                 singleLine = true,
                 isError = state.showErrors && state.titleError != null,
-                supportingText = if (state.showErrors && state.titleError != null) {
-                    { Text(stringResource(R.string.error_title_empty)) }
-                } else {
-                    null
+                supportingText = when {
+                    state.showErrors && state.titleError != null -> {
+                        { Text(stringResource(R.string.error_title_empty)) }
+                    }
+                    // 같은 이름이 있으면 입력하는 동안 미리 알려 준다(오류는 아니다)
+                    state.duplicate != null -> {
+                        {
+                            Text(
+                                stringResource(
+                                    if (state.duplicate?.archived == true) R.string.duplicate_hint_archived else R.string.duplicate_hint,
+                                ),
+                                color = MaterialTheme.colorScheme.tertiary,
+                            )
+                        }
+                    }
+                    else -> null
                 },
                 modifier = Modifier.fillMaxWidth(),
             )

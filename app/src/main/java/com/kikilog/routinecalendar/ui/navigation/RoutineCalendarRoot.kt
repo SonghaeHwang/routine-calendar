@@ -100,6 +100,11 @@ fun RoutineCalendarRoot(startTab: TopLevelTab = DEFAULT_START_TAB) {
                             goBack()
                             scope.launch { snackbarHostState.showSnackbar(editedMessage) }
                         },
+                        // 등록 화면을 닫고 같은 이름의 기존 루틴 수정 화면으로 바꾼다
+                        onOpenExisting = { id ->
+                            goBack()
+                            openEdit(id)
+                        },
                     )
                 }
                 entry<SettingsKey> { SettingsScreen(onBack = goBack, onOpenPresets = { backStack.add(PresetsKey) }) }

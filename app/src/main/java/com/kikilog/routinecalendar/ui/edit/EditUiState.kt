@@ -10,6 +10,9 @@ enum class TitleError { EMPTY }
 
 enum class AmountError { INVALID, TOO_LARGE }
 
+/** 이름이 같은지 비교할 다른 루틴(보관한 것 포함) */
+data class NamedRoutine(val id: Long, val title: String, val archived: Boolean)
+
 /** 주기 숫자의 최댓값. 개월 단위로 펼칠 때 숫자가 지나치게 커지지 않게 막는다. */
 const val MAX_INTERVAL_AMOUNT = 365
 
@@ -37,6 +40,14 @@ data class EditUiState(
     val closed: Boolean = false,
     /** 등록 화면 위쪽 빠른 선택(설정에서 편집한 목록) */
     val presets: List<Preset> = emptyList(),
+    /** 자기 자신을 뺀 다른 루틴들. 같은 이름 안내에 쓴다 */
+    val others: List<NamedRoutine> = emptyList(),
+    /** 등록할 때 같은 이름이 있어 확인 창을 띄울지 */
+    val askDuplicate: Boolean = false,
+    /** 확인 창에서 「그래도 추가」를 골랐는지. 이름을 바꾸면 다시 false */
+    val duplicateConfirmed: Boolean = false,
+    /** 확인 창에서 「기존 루틴 열기」를 골랐을 때 그 루틴 */
+    val openExistingId: Long? = null,
     val title: String = "",
     val category: Category = Category.HOUSE,
     val amountText: String = "1",
@@ -66,6 +77,14 @@ data class EditUiState(
     val isValid: Boolean get() = titleError == null && amountError == null
 
     val isEdit: Boolean get() = routineId != null
+
+    /** 앞뒤 공백을 뺀 이름이 같은 다른 루틴. 없으면 null */
+    val duplicate: NamedRoutine?
+        get() {
+            val trimmed = title.trim()
+            if (trimmed.isEmpty()) return null
+            return others.firstOrNull { it.title == trimmed }
+        }
 
     /** 검사를 통과했을 때만 쓴다 */
     val interval: Interval? get() = amountText.toIntOrNull()?.takeIf { amountError == null }?.let { Interval(it, unit) }

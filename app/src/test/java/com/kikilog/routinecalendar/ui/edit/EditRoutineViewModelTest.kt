@@ -282,6 +282,82 @@ class EditRoutineViewModelTest {
         assertEquals(emptyList<Any>(), savedRoutines())
     }
 
+    // ── 같은 이름 ──
+
+    @Test
+    fun `같은 이름을 입력하면 안내하고, 앞뒤 공백은 무시한다`() = runTest {
+        val id = addRoutine("젤팩", 1, IntervalUnit.WEEK)
+        viewModel.state.first { it.others.isNotEmpty() }
+
+        viewModel.onTitleChange(" 젤팩 ")
+        assertEquals(id, state.duplicate?.id)
+        viewModel.onTitleChange("젤팩 마스크")
+        assertNull(state.duplicate)
+    }
+
+    @Test
+    fun `등록할 때 같은 이름이면 확인 창을 띄우고 저장하지 않는다`() = runTest {
+        addRoutine("젤팩", 1, IntervalUnit.WEEK)
+        viewModel.state.first { it.others.isNotEmpty() }
+
+        viewModel.applyPreset(DEFAULT_PRESETS.single { it.title == "젤팩" })
+        viewModel.save()
+
+        assertTrue(state.askDuplicate)
+        assertFalse(state.saved)
+        assertEquals(1, savedRoutines().size)
+    }
+
+    @Test
+    fun `그래도 추가를 고르면 같은 이름으로 하나 더 저장된다`() = runTest {
+        addRoutine("젤팩", 1, IntervalUnit.WEEK)
+        viewModel.state.first { it.others.isNotEmpty() }
+        viewModel.onTitleChange("젤팩")
+        viewModel.save()
+
+        viewModel.onAddAnyway()
+        viewModel.state.first { it.saved }
+        assertEquals(listOf("젤팩", "젤팩"), savedRoutines().map { it.routine.title })
+    }
+
+    @Test
+    fun `기존 루틴 열기를 고르면 그 루틴으로 가고 새로 저장하지 않는다`() = runTest {
+        val id = addRoutine("젤팩", 1, IntervalUnit.WEEK)
+        viewModel.state.first { it.others.isNotEmpty() }
+        viewModel.onTitleChange("젤팩")
+        viewModel.save()
+
+        viewModel.onOpenExisting()
+        assertEquals(id, state.openExistingId)
+        assertFalse(state.askDuplicate)
+        assertEquals(1, savedRoutines().size)
+    }
+
+    @Test
+    fun `보관한 루틴과 이름이 같아도 알려 준다`() = runTest {
+        val id = addRoutine("젤팩", 1, IntervalUnit.WEEK)
+        repository.setArchived(id, true)
+        viewModel.state.first { s -> s.others.any { it.archived } }
+
+        viewModel.onTitleChange("젤팩")
+        assertTrue(state.duplicate!!.archived)
+    }
+
+    @Test
+    fun `수정 중에는 자기 이름은 겹침이 아니고, 다른 루틴 이름으로 바꿔도 창 없이 저장된다`() = runTest {
+        addRoutine("젤팩", 1, IntervalUnit.WEEK)
+        val id = addRoutine("모델링팩", 1, IntervalUnit.WEEK)
+        val vm = editViewModel(id)
+        vm.state.first { it.others.isNotEmpty() }
+        assertNull(vm.state.value.duplicate)
+
+        vm.onTitleChange("젤팩")
+        assertTrue(vm.state.value.duplicate != null)
+        vm.save()
+        vm.state.first { it.saved }
+        assertFalse(vm.state.value.askDuplicate)
+    }
+
     @Test
     fun `없는 루틴을 열면 notFound`() = runTest {
         val vm = EditRoutineViewModel(repository, today = { today }, routineId = 999)

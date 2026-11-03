@@ -46,6 +46,15 @@ class EditRoutineViewModel(
         if (routineId == null) {
             viewModelScope.launch { presets.collect { list -> _state.update { it.copy(presets = list) } } }
         }
+        // 같은 이름 안내용: 보관한 것까지 포함한 다른 루틴 이름
+        viewModelScope.launch {
+            repository.observeRoutines(includeArchived = true).collect { list ->
+                val others = list.map { it.routine }
+                    .filter { it.id != routineId }
+                    .map { NamedRoutine(it.id, it.title, it.archived) }
+                _state.update { it.copy(others = others) }
+            }
+        }
     }
 
     private fun load(id: Long) {
@@ -76,7 +85,9 @@ class EditRoutineViewModel(
         }
     }
 
-    fun onTitleChange(title: String) = _state.update { it.copy(title = title.take(MAX_TITLE_LENGTH)) }
+    fun onTitleChange(title: String) = _state.update {
+        it.copy(title = title.take(MAX_TITLE_LENGTH), duplicateConfirmed = false)
+    }
 
     fun onCategoryChange(category: Category) = _state.update { it.copy(category = category) }
 
@@ -111,6 +122,19 @@ class EditRoutineViewModel(
 
     fun onSaveFailedShown() = _state.update { it.copy(saveFailed = false) }
 
+    /** 같은 이름 확인 창: 그래도 추가 */
+    fun onAddAnyway() {
+        _state.update { it.copy(askDuplicate = false, duplicateConfirmed = true) }
+        save()
+    }
+
+    /** 같은 이름 확인 창: 기존 루틴 열기(입력하던 내용은 버린다) */
+    fun onOpenExisting() = _state.update {
+        it.copy(askDuplicate = false, openExistingId = it.duplicate?.id)
+    }
+
+    fun onDismissDuplicate() = _state.update { it.copy(askDuplicate = false) }
+
     /** 수정 모드 더보기: 보관 · 보관 해제. 끝나면 화면을 닫는다 */
     fun onToggleArchive() {
         val id = _state.value.routineId ?: return
@@ -136,6 +160,11 @@ class EditRoutineViewModel(
         val interval = current.interval
         if (!current.isValid || interval == null) {
             _state.update { it.copy(showErrors = true) }
+            return
+        }
+        // 등록할 때만 같은 이름을 묻는다. 수정 중에는 입력한 내용을 잃지 않도록 안내만 한다
+        if (!current.isEdit && current.duplicate != null && !current.duplicateConfirmed) {
+            _state.update { it.copy(showErrors = true, askDuplicate = true) }
             return
         }
         _state.update { it.copy(showErrors = true, isSaving = true) }
