@@ -1,53 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    앱 아이콘 앞 층: 삼색 고양이 귀가 달린 크림색 달력(2026-11-04 사용자가 준 펠트 그림을 벡터로 다시 그림).
-    왼쪽 귀 주황 · 오른쪽 귀 고동색, 고리 둘, 날짜 칸 4×3. 뒤 층이 흰색이라 몸통은 크림색 + 연한 테두리로 구분한다.
-    모양 경로는 values/icon_paths.xml (단색 층과 공용)
+    앱 아이콘 앞 층: 사용자가 준 「고양이 귀 달력」 그림(drawable-nodpi/ic_launcher_art.png, 271×275)을 그대로 쓴다(2026-11-04 결정).
+    108dp 캔버스 정가운데에 비율을 지켜 54×55dp 로 둔다. 66dp 로 두니 S26 에서 귀 끝이 모서리에 잘려 줄였다.
+    그림 바탕이 흰색이라 흰 뒤 층과 이어진다.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <!-- 귀는 몸통 뒤에 -->
-    <path
-        android:fillColor="#FFE8A04E"
-        android:pathData="@string/ic_cal_ear_left_path" />
-    <path
-        android:fillColor="#FF6B4E44"
-        android:pathData="@string/ic_cal_ear_right_path" />
-
-    <!-- 몸통 -->
-    <path
-        android:fillColor="#FFF6E9D7"
-        android:pathData="@string/ic_cal_body_path"
-        android:strokeWidth="1.2"
-        android:strokeColor="#FFE3CFB4" />
-
-    <!-- 머리띠 아래 구분선 -->
-    <path
-        android:pathData="M34,55 H74"
-        android:strokeWidth="1"
-        android:strokeColor="#FFE3CFB4" />
-
-    <!-- 날짜 칸: 같은 색 둥근 테두리로 모서리를 부드럽게 -->
-    <path
-        android:fillColor="#FFEBD8BE"
-        android:pathData="@string/ic_cal_cells_path"
-        android:strokeWidth="1.2"
-        android:strokeColor="#FFEBD8BE"
-        android:strokeLineJoin="round" />
-
-    <!-- 고리 둘 -->
-    <path
-        android:fillColor="#FFFBF3E8"
-        android:pathData="M42,40 Q42,37 45,37 Q48,37 48,40 V47 Q48,50 45,50 Q42,50 42,47 Z"
-        android:strokeWidth="1"
-        android:strokeColor="#FFDCC6AA" />
-    <path
-        android:fillColor="#FFFBF3E8"
-        android:pathData="M60,40 Q60,37 63,37 Q66,37 66,40 V47 Q66,50 63,50 Q60,50 60,47 Z"
-        android:strokeWidth="1"
-        android:strokeColor="#FFDCC6AA" />
-</vector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="54dp"
+        android:height="55dp"
+        android:drawable="@drawable/ic_launcher_art"
+        android:gravity="center" />
+</layer-list>
