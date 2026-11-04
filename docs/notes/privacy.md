@@ -282,6 +282,12 @@ kikilog(이하 「개발자」)는 Android 앱 <앱 이름>(패키지 com.kikilo
 - [ ] ⑩ `./gradlew test assembleDebug` → 휴대폰에서 링크 열림 확인 → 커밋 · DEVLOG
 - [ ] ⑪ PLAN 9단계 체크 항목 갱신(방침 · 데이터 보안 완료 표시)
 
+## 정한 것 (2026-11-04 사용자 답)
+
+- 앱 이름: 「때됐냥」 (방침 제목의 `<앱 이름>` 자리)
+- 연락 이메일: hwangsonghae99@gmail.com (사용자가 개인 주소를 골랑. Play 등록정보 · 방침에 공개됨)
+- 방침을 올릴 저장소: `routine-calendar` (앱 저장소). 지금 비공개라 무료 GitHub Pages 를 쓰려면 공개로 바꿔야 한다 — 공개 전에 커밋 기록 점검 후 사용자가 GitHub 설정에서 직접 바꾼다(확인 대기)
+
 ## 열린 질문
 
 1. 방침 주소를 어디에 둘지 — A 공개 저장소 `privacy`(추천) · B `<사용자>.github.io` · C 조직 `kikilog` 새로 만들기.
