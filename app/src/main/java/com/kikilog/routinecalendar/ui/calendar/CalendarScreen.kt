@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -297,6 +298,7 @@ private fun MonthGrid(
 /**
  * 날짜 한 칸: 숫자 + 아래 표시. 분류마다 그 색 점 하나(할 예정), 지났는데 안 한 것은 빨간 테두리 점,
  * 그날 한 것은 그 분류 색 ✓. 칸이 작아 최대 [MAX_MARKS] 개까지, 넘치면 「+」.
+ * 그날 할 루틴을 모두 했으면 점 · ✓ 대신 고양이 발바닥 도장 하나(보상).
  * 오늘은 동그라미 배경, 고른 날은 테두리, 앞뒤 달은 흐리게.
  */
 @Composable
@@ -314,7 +316,9 @@ private fun DayCell(
 ) {
     val dueCount = day?.dueIds?.size ?: 0
     val doneCount = day?.doneIds?.size ?: 0
-    val description = stringResource(R.string.calendar_cell_desc, formatDate(date, date), dueCount, doneCount)
+    val allDone = day?.allDone == true
+    val description = stringResource(R.string.calendar_cell_desc, formatDate(date, date), dueCount, doneCount) +
+        if (allDone) stringResource(R.string.calendar_cell_all_done) else ""
     Column(
         modifier = modifier
             .heightIn(min = 56.dp)
@@ -348,11 +352,20 @@ private fun DayCell(
                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
             )
         }
+        if (allDone) {
+            Icon(
+                painter = painterResource(R.drawable.ic_paw),
+                contentDescription = null,
+                tint = PAW_COLOR,
+                modifier = Modifier.size(MARK_ROW_HEIGHT),
+            )
+            return@Column
+        }
         val marks = dueCategories.map { it to false } + doneCategories.map { it to true }
         Row(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.heightIn(min = 14.dp),
+            modifier = Modifier.heightIn(min = MARK_ROW_HEIGHT),
         ) {
             marks.take(MAX_MARKS).forEach { (category, done) ->
                 if (done) {
@@ -379,6 +392,12 @@ private fun DayCell(
 
 private const val MAX_MARKS = 4
 private val MARK_SIZE: Dp = 7.dp
+
+/** 점 줄 높이. 발바닥 도장도 이 크기라 도장이 찍힌 주도 칸 높이가 같다 */
+private val MARK_ROW_HEIGHT: Dp = 18.dp
+
+/** 발바닥 도장 색. 앱 아이콘 삼색 고양이의 주황 귀 색 */
+private val PAW_COLOR = Color(0xFFE8913A)
 private val SWIPE_THRESHOLD: Dp = 56.dp
 
 /**

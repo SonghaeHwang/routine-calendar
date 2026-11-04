@@ -38,6 +38,9 @@ fun weekDays(weekStart: DayOfWeek): List<DayOfWeek> =
  */
 data class CalendarDay(val dueIds: Set<Long>, val doneIds: Set<Long>) {
     val isEmpty: Boolean get() = dueIds.isEmpty() && doneIds.isEmpty()
+
+    /** 그날 한 것이 있고 남은 예정이 없는 날. 달력에 발바닥 도장을 찍는다 */
+    val allDone: Boolean get() = doneIds.isNotEmpty() && doneIds.containsAll(dueIds)
 }
 
 /**

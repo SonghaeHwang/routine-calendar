@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 고양이 발바닥: 큰 젤리 하나 + 발가락 젤리 넷. 그날 할 루틴을 모두 한 날 달력 칸에 찍는 도장 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M6.8,16.3a5.2,4.3 0,1 0,10.4 0a5.2,4.3 0,1 0,-10.4 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M3.3,10.8a1.9,2.4 0,1 0,3.8 0a1.9,2.4 0,1 0,-3.8 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M7.3,6.6a2,2.6 0,1 0,4 0a2,2.6 0,1 0,-4 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12.7,6.6a2,2.6 0,1 0,4 0a2,2.6 0,1 0,-4 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M16.9,10.8a1.9,2.4 0,1 0,3.8 0a1.9,2.4 0,1 0,-3.8 0z" />
+</vector>

@@ -124,6 +124,7 @@
     <string name="calendar_done">완료</string>
     <string name="calendar_missed">놓침</string>
     <string name="calendar_cell_desc">%1$s, 예정 %2$d개, 완료 %3$d개</string>
+    <string name="calendar_cell_all_done">, 모두 완료</string>
 
     <!-- 설정 -->
     <string name="settings_privacy_title">개인정보</string>

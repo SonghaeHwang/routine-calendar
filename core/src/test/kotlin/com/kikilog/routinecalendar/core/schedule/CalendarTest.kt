@@ -28,6 +28,36 @@ class CalendarTest {
 
     private fun done(routineId: Long, on: String) = Completion(0, routineId, d(on))
 
+    // ── 다 한 날(발바닥 도장) ──
+
+    @Test
+    fun `한 것만 있고 남은 예정이 없으면 다 한 날`() {
+        assertTrue(CalendarDay(dueIds = emptySet(), doneIds = setOf(1L, 2L)).allDone)
+    }
+
+    @Test
+    fun `남은 예정이 하나라도 있으면 다 한 날이 아니다`() {
+        assertFalse(CalendarDay(dueIds = setOf(3L), doneIds = setOf(1L)).allDone)
+    }
+
+    @Test
+    fun `예정이면서 그날 한 루틴은 한 것으로 본다`() {
+        assertTrue(CalendarDay(dueIds = setOf(1L), doneIds = setOf(1L)).allDone)
+    }
+
+    @Test
+    fun `아무것도 안 한 날은 도장이 없다`() {
+        assertFalse(CalendarDay(dueIds = emptySet(), doneIds = emptySet()).allDone)
+        assertFalse(CalendarDay(dueIds = setOf(1L), doneIds = emptySet()).allDone)
+    }
+
+    @Test
+    fun `예정대로 한 날은 달력에서 다 한 날로 보인다`() {
+        val r = routine(1, firstDue = "2026-11-02")
+        val days = buildCalendarDays(listOf(r to listOf(done(1, "2026-11-02"))), d("2026-11-01")..d("2026-11-08"))
+        assertTrue(days.getValue(d("2026-11-02")).allDone)
+    }
+
     // ── 달력 칸 ──
 
     @Test
