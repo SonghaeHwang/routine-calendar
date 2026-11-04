@@ -211,6 +211,21 @@ class RoutineRepositoryTest {
     }
 
     @Test
+    fun `알림 넣기를 여러 개 한꺼번에 끄고 켠다`() = runTest {
+        val a = repo.add(draft(), lastDoneOn = null)
+        val b = repo.add(draft(), lastDoneOn = null)
+
+        assertEquals(2, repo.setNotify(listOf(a, b), false))
+        assertFalse(loaded(a).routine.notify)
+        assertFalse(loaded(b).routine.notify)
+
+        repo.setNotify(listOf(b), true)
+        assertFalse(loaded(a).routine.notify)
+        assertTrue(loaded(b).routine.notify)
+        assertEquals(0, repo.setNotify(emptyList(), true))
+    }
+
+    @Test
     fun `삭제하면 기록도 사라진다`() = runTest {
         val id = repo.add(draft(), lastDoneOn = d("2026-10-20"))
         repo.check(id)

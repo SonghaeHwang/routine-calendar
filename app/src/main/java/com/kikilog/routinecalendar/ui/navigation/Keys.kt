@@ -14,12 +14,19 @@ data object CalendarKey : NavKey
 @Serializable
 data object RoutinesKey : NavKey
 
-/** 루틴 등록(routineId = null) 또는 수정 */
+/**
+ * 루틴 등록(routineId = null) 또는 수정.
+ * [startDate] 는 등록할 때 루틴 시작일의 처음 값(ISO 날짜). 달력에서 고른 날에 추가할 때 쓴다
+ */
 @Serializable
-data class EditKey(val routineId: Long? = null) : NavKey
+data class EditKey(val routineId: Long? = null, val startDate: String? = null) : NavKey
 
 @Serializable
 data object SettingsKey : NavKey
+
+/** 설정 → 알림에 넣을 루틴 */
+@Serializable
+data object NotifyRoutinesKey : NavKey
 
 /** 설정 → 빠른 선택 편집 */
 @Serializable

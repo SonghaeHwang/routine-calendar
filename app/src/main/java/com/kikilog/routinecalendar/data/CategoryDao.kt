@@ -27,6 +27,15 @@ abstract class CategoryDao {
     @Query("UPDATE category SET name = :name, color = :color WHERE id = :id")
     abstract suspend fun update(id: Long, name: String, color: Int): Int
 
+    @Query("UPDATE category SET position = :position WHERE id = :id")
+    protected abstract suspend fun setPosition(id: Long, position: Int)
+
+    /** [ids] 순서대로 position 을 0, 1, 2… 로 다시 매긴다(한 트랜잭션) */
+    @Transaction
+    open suspend fun reorder(ids: List<Long>) {
+        ids.forEachIndexed { index, id -> setPosition(id, index) }
+    }
+
     /** 이 분류에 든 루틴(보관 포함)과 빠른 선택 수 */
     @Query(
         "SELECT (SELECT COUNT(*) FROM routine WHERE category_id = :id) + (SELECT COUNT(*) FROM preset WHERE category_id = :id)",

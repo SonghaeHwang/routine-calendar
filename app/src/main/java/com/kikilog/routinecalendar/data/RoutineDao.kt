@@ -67,6 +67,10 @@ abstract class RoutineDao {
     @Query("UPDATE routine SET archived = :archived WHERE id IN (:ids)")
     abstract suspend fun setArchived(ids: List<Long>, archived: Boolean): Int
 
+    /** 설정 → 알림에 넣을 루틴 */
+    @Query("UPDATE routine SET notify = :notify WHERE id IN (:ids)")
+    abstract suspend fun setNotify(ids: List<Long>, notify: Boolean): Int
+
     @Query("DELETE FROM completion WHERE routine_id = :routineId AND done_on = :doneOn")
     abstract suspend fun deleteCompletion(routineId: Long, doneOn: LocalDate): Int
 

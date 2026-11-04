@@ -20,6 +20,15 @@ class CategoryRepository(private val dao: CategoryDao) {
     /** 이름 · 색을 바꾼다. 「기타」도 바꿀 수 있다 */
     suspend fun update(id: Long, name: String, colorArgb: Int): Boolean = dao.update(id, name.validated(), colorArgb) > 0
 
+    /**
+     * 분류 편집에서 꾹 눌러 끌어 바꾼 순서를 저장한다. 등록 화면 분류 칩 · 빠른 선택 등 분류를 보이는 곳이 모두 이 순서를 따른다.
+     * 목록에 없는 분류가 있으면(동시에 추가 등) 뒤에 붙여 순서를 잃지 않게 한다
+     */
+    suspend fun reorder(ids: List<Long>) {
+        val rest = dao.all().map { it.id }.filter { it !in ids }
+        dao.reorder(ids.distinct() + rest)
+    }
+
     /** 지울 때 경고가 필요한지(루틴 · 빠른 선택이 들어 있는지) */
     suspend fun itemCount(id: Long): Int = dao.itemCount(id)
 

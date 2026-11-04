@@ -9,23 +9,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +37,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,13 +65,17 @@ fun CategoriesRoute(onBack: () -> Unit) {
         state = state,
         onBack = onBack,
         onSave = viewModel::save,
+        onReorder = viewModel::reorder,
         onRequestDelete = viewModel::requestDelete,
         onConfirmDelete = viewModel::confirmDelete,
         onDismissDelete = viewModel::dismissDelete,
     )
 }
 
-/** 분류를 누르면 이름 · 색을 고치고, 오른쪽 위 + 로 추가, 각 줄의 삭제. 「기타」는 지울 수 없다 */
+/**
+ * 분류를 누르거나 「수정」 으로 이름 · 색을 고치고, 꾹 눌러 끌어 순서를 바꾼다.
+ * 오른쪽 위 + 로 추가, 각 줄의 삭제. 「기타」는 지울 수 없다
+ */
 @Composable
 fun CategoriesScreen(
     state: CategoriesUiState,
@@ -74,9 +84,14 @@ fun CategoriesScreen(
     onRequestDelete: (Category) -> Unit,
     onConfirmDelete: () -> Unit,
     onDismissDelete: () -> Unit,
+    onReorder: (List<Long>) -> Unit = {},
 ) {
     // 편집 중인 분류. NEW 면 새 분류, null 이면 대화상자 닫힘
     var editing by remember { mutableStateOf<Category?>(null) }
+    val listState = rememberLazyListState()
+    val drag = rememberCategoryDragState(listState)
+    // 끌지 않을 때는 저장된 순서를 따른다. 끌는 동안에는 화면 안 순서만 바꾼다
+    LaunchedEffect(state.categories) { drag.sync(state.categories) }
 
     SubScaffold(
         title = stringResource(R.string.categories_edit),
@@ -89,26 +104,51 @@ fun CategoriesScreen(
     ) { padding ->
         if (state.isLoading) return@SubScaffold
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
         ) {
-            items(state.categories, key = { it.id }) { category ->
-                ListItem(
-                    modifier = Modifier.clickable { editing = category },
-                    leadingContent = { CategoryDot(category.color, size = 16.dp) },
-                    headlineContent = { Text(category.name) },
-                    supportingContent = if (!category.removable) {
-                        { Text(stringResource(R.string.category_etc_hint)) }
-                    } else {
-                        null
-                    },
-                    trailingContent = if (category.removable) {
-                        { TextButton(onClick = { onRequestDelete(category) }) { Text(stringResource(R.string.action_delete)) } }
-                    } else {
-                        null
-                    },
+            item(key = "hint") {
+                Text(
+                    text = stringResource(R.string.categories_reorder_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
-                HorizontalDivider()
+            }
+            items(drag.items, key = { it.id }) { category ->
+                val dragging = drag.draggingId == category.id
+                Column(
+                    modifier = Modifier
+                        .then(if (dragging) Modifier.zIndex(1f) else Modifier.animateItem())
+                        .graphicsLayer { translationY = if (dragging) drag.offsetY else 0f }
+                        .categoryDraggable(category.id, drag) { onReorder(it) },
+                ) {
+                    ListItem(
+                        modifier = Modifier.clickable(onClickLabel = stringResource(R.string.category_edit)) { editing = category },
+                        leadingContent = { CategoryDot(category.color, size = 16.dp) },
+                        headlineContent = { Text(category.name) },
+                        supportingContent = if (!category.removable) {
+                            { Text(stringResource(R.string.category_etc_hint)) }
+                        } else {
+                            null
+                        },
+                        trailingContent = {
+                            Row {
+                                TextButton(onClick = { editing = category }) { Text(stringResource(R.string.action_edit)) }
+                                if (category.removable) {
+                                    TextButton(onClick = { onRequestDelete(category) }) { Text(stringResource(R.string.action_delete)) }
+                                }
+                            }
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = if (dragging) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surface,
+                        ),
+                        tonalElevation = if (dragging) 4.dp else 0.dp,
+                        shadowElevation = if (dragging) 4.dp else 0.dp,
+                    )
+                    HorizontalDivider()
+                }
             }
         }
     }

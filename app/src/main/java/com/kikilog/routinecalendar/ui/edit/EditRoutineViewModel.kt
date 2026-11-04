@@ -27,6 +27,7 @@ import kotlinx.datetime.LocalDate
 /**
  * 루틴 등록 · 수정 화면.
  * @param routineId null 이면 등록, 아니면 그 루틴을 불러와 수정한다
+ * @param startDate 등록할 때 루틴 시작일의 처음 값(달력에서 고른 날). null 이면 오늘
  */
 class EditRoutineViewModel(
     private val repository: RoutineRepository,
@@ -34,10 +35,13 @@ class EditRoutineViewModel(
     routineId: Long? = null,
     presets: Flow<List<Preset>> = flowOf(DEFAULT_PRESETS),
     categories: Flow<List<Category>> = flowOf(DEFAULT_CATEGORIES),
+    startDate: LocalDate? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        EditUiState(today = today(), routineId = routineId, isLoading = routineId != null),
+        today().let { date ->
+            EditUiState(today = date, routineId = routineId, isLoading = routineId != null, startDate = startDate ?: date)
+        },
     )
     val state: StateFlow<EditUiState> = _state.asStateFlow()
 
@@ -202,7 +206,7 @@ class EditRoutineViewModel(
     companion object {
         const val MAX_TITLE_LENGTH = 30
 
-        fun factory(routineId: Long?): ViewModelProvider.Factory = viewModelFactory {
+        fun factory(routineId: Long?, startDate: LocalDate? = null): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as RoutineCalendarApp).container
                 EditRoutineViewModel(
@@ -211,6 +215,7 @@ class EditRoutineViewModel(
                     routineId = routineId,
                     presets = container.presetRepository.observePresets(),
                     categories = container.categoryRepository.observeCategories(),
+                    startDate = startDate,
                 )
             }
         }

@@ -70,19 +70,21 @@ import kotlinx.datetime.LocalDate
 /**
  * 화면 이동에서 부르는 입구. ViewModel 은 이 화면이 닫힐 때 함께 정리된다.
  * @param routineId null 이면 등록, 아니면 수정
+ * @param startDate 등록할 때 루틴 시작일의 처음 값(달력에서 고른 날). null 이면 오늘
  * @param onAdded 등록되면 이름 · 다음 예정일 · 오늘을 넘겨 안내 문구를 띄우게 한다(화면은 부르는 쪽이 닫는다)
  * @param onEdited 수정이 저장되면 부른다
  */
 @Composable
 fun EditRoutineRoute(
     routineId: Long?,
+    startDate: LocalDate? = null,
     onBack: () -> Unit,
     onAdded: (title: String, nextDue: LocalDate, today: LocalDate) -> Unit,
     onEdited: () -> Unit,
     onOpenExisting: (Long) -> Unit,
     onOpenCategories: () -> Unit = {},
 ) {
-    val viewModel: EditRoutineViewModel = viewModel(factory = EditRoutineViewModel.factory(routineId))
+    val viewModel: EditRoutineViewModel = viewModel(factory = EditRoutineViewModel.factory(routineId, startDate))
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     // 같은 이름 확인 창에서 「기존 루틴 열기」
@@ -109,7 +111,6 @@ fun EditRoutineRoute(
         onAmountChange = viewModel::onAmountChange,
         onUnitChange = viewModel::onUnitChange,
         onRepeatsChange = viewModel::onRepeatsChange,
-        onNotifyChange = viewModel::onNotifyChange,
         onStartDateChange = viewModel::onStartDateChange,
         onFirstDueChange = viewModel::onFirstDueChange,
         onPreset = viewModel::applyPreset,
@@ -133,7 +134,6 @@ fun EditRoutineScreen(
     onAmountChange: (String) -> Unit,
     onUnitChange: (IntervalUnit) -> Unit,
     onRepeatsChange: (Boolean) -> Unit,
-    onNotifyChange: (Boolean) -> Unit,
     onStartDateChange: (LocalDate) -> Unit,
     onFirstDueChange: (LocalDate) -> Unit,
     onPreset: (Preset) -> Unit,
@@ -328,11 +328,7 @@ fun EditRoutineScreen(
                 }
             }
 
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.label_notify)) },
-                supportingContent = { Text(stringResource(R.string.notify_hint)) },
-                trailingContent = { Switch(checked = state.notify, onCheckedChange = onNotifyChange) },
-            )
+            // 알림에 넣을지는 설정 → 「알림에 넣을 루틴」 에서 한꺼번에 고친다. 새 루틴은 켜진 채로 등록된다
 
             // 등록일은 상세(수정) 화면에서만 보인다. 고칠 수 없는 정보다
             state.createdOn?.let { createdOn ->

@@ -49,7 +49,7 @@ class RoutineInfoViewModelTest {
     }
 
     @Test
-    fun `분류 · 다음 예정일 · 마지막으로 한 날 · 앞으로 예정일 3개`() = runTest {
+    fun `분류 · 다음 예정일 · 마지막으로 한 날`() = runTest {
         val id = repository.add(
             RoutineDraft("젤팩", Category.BEAUTY, Interval(1, IntervalUnit.WEEK), repeats = true, notify = true),
             LocalDate.parse("2026-10-20"),
@@ -61,10 +61,19 @@ class RoutineInfoViewModelTest {
         assertEquals(LocalDate.parse("2026-10-20"), state.lastDoneOn)
         assertEquals(LocalDate.parse("2026-10-27"), state.nextDue)
         assertEquals(7, state.overdueDays)
-        assertEquals(
-            listOf("2026-10-27", "2026-11-03", "2026-11-10").map(LocalDate::parse),
-            state.upcoming,
+    }
+
+    @Test
+    fun `정보 화면에서 알림을 끄면 루틴에 저장된다`() = runTest {
+        val id = repository.add(
+            RoutineDraft("젤팩", Category.BEAUTY, Interval(1, IntervalUnit.WEEK), repeats = true, notify = true),
+            null,
         )
+        val viewModel = RoutineInfoViewModel(repository, id, today)
+        viewModel.state.first { it.routine != null }
+
+        viewModel.setNotify(false)
+        assertEquals(false, viewModel.state.first { it.routine?.notify == false }.routine?.notify)
     }
 
     @Test

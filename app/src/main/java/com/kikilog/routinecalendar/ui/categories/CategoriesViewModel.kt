@@ -49,6 +49,12 @@ class CategoriesViewModel(private val repository: CategoryRepository) : ViewMode
         return true
     }
 
+    /** 꾹 눌러 끌어 놓은 뒤의 순서(분류 id 목록) */
+    fun reorder(ids: List<Long>) {
+        if (ids == state.value.categories.map { it.id }) return
+        viewModelScope.launch { runCatching { repository.reorder(ids) } }
+    }
+
     /** 삭제를 누르면 든 항목 수를 세어 확인 창을 띄운다. 「기타」는 무시한다 */
     fun requestDelete(category: Category) {
         if (!category.removable) return

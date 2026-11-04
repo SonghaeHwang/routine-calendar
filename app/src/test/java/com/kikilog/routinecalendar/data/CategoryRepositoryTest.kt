@@ -51,6 +51,16 @@ class CategoryRepositoryTest {
     }
 
     @Test
+    fun `순서를 바꾸면 그 순서로 보이고, 빠진 분류는 뒤에 붙는다`() = runTest {
+        val ids = DEFAULT_CATEGORIES.map { it.id }
+        categories.reorder(listOf(ids[2], ids[0]))
+        assertEquals(
+            listOf(ids[2], ids[0], ids[1], ids[3]),
+            categories.observeCategories().first().map { it.id },
+        )
+    }
+
+    @Test
     fun `추가하면 끝에 붙고 색은 아직 안 쓴 계열에서 고른다`() = runTest {
         val id = categories.add("  운동 ")
         val added = categories.observeCategories().first().last()

@@ -74,6 +74,18 @@ class EditRoutineViewModelTest {
     }
 
     @Test
+    fun `달력에서 고른 지난 날에 추가하면 그날이 시작일이고 그날 한 것으로 저장된다`() = runTest {
+        val picked = LocalDate.parse("2026-10-28")
+        val vm = EditRoutineViewModel(repository, today = { today }, startDate = picked)
+        assertEquals(picked, vm.state.value.startDate)
+
+        vm.onTitleChange("수건 삶기")
+        vm.save()
+        val saved = savedRoutines().single()
+        assertEquals(listOf(picked), saved.completions.map { it.doneOn })
+    }
+
+    @Test
     fun `등록 화면은 받은 빠른 선택 목록을 쓰고, 바뀌면 바로 반영한다`() {
         val presets = kotlinx.coroutines.flow.MutableStateFlow(DEFAULT_PRESETS.take(2))
         val vm = EditRoutineViewModel(repository, today = { today }, presets = presets)

@@ -53,13 +53,14 @@ import com.kikilog.routinecalendar.ui.format.notifyTimeLabel
 import kotlinx.datetime.DayOfWeek
 
 /**
- * 설정 화면: 알림 · 주 시작 요일 · 첫 화면 · 분류 · 빠른 선택 편집 · 백업 · 개인정보 안내 · 방침 링크 · 의견 보내기 · 앱 버전.
+ * 설정 화면: 알림(알림에 넣을 루틴) · 주 시작 요일 · 첫 화면 · 분류 · 빠른 선택 편집 · 백업 · 개인정보 안내 · 방침 링크 · 의견 보내기 · 앱 버전.
  */
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
     onOpenPresets: () -> Unit,
     onOpenCategories: () -> Unit,
+    onOpenNotifyRoutines: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -82,6 +83,12 @@ fun SettingsScreen(
                     time = state.notifyTime,
                     onEnabledChange = viewModel::setNotifyEnabled,
                     onTimeChange = viewModel::setNotifyTime,
+                )
+                // 루틴마다 알림에 넣을지는 등록 화면이 아니라 여기서 한꺼번에 고친다
+                ListItem(
+                    modifier = Modifier.clickable(onClick = onOpenNotifyRoutines),
+                    headlineContent = { Text(stringResource(R.string.notify_routines)) },
+                    supportingContent = { Text(stringResource(R.string.notify_routines_hint)) },
                 )
                 HorizontalDivider()
                 ChoiceSetting(

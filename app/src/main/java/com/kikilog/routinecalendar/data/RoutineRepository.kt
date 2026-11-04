@@ -86,6 +86,10 @@ class RoutineRepository(
     suspend fun setArchived(ids: Collection<Long>, archived: Boolean): Int =
         if (ids.isEmpty()) 0 else dao.setArchived(ids.toList(), archived)
 
+    /** 하루 한 번 요약 알림에 넣을지. 설정의 「알림에 넣을 루틴」 에서 하나 또는 한꺼번에 바꾼다 */
+    suspend fun setNotify(ids: Collection<Long>, notify: Boolean): Int =
+        if (ids.isEmpty()) 0 else dao.setNotify(ids.toList(), notify)
+
     /**
      * 완료 체크. 새로 기록했으면 true, 그날 이미 있으면 false.
      * @throws IllegalArgumentException [doneOn] 이 오늘보다 늦을 때

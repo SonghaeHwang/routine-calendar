@@ -32,7 +32,9 @@ import com.kikilog.routinecalendar.ui.info.RoutineInfoRoute
 import com.kikilog.routinecalendar.ui.format.formatDate
 import com.kikilog.routinecalendar.ui.presets.PresetsRoute
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import com.kikilog.routinecalendar.ui.routines.RoutinesRoute
+import com.kikilog.routinecalendar.ui.settings.NotifyRoutinesRoute
 import com.kikilog.routinecalendar.ui.settings.SettingsScreen
 import com.kikilog.routinecalendar.ui.today.TodayRoute
 
@@ -57,6 +59,8 @@ fun RoutineCalendarRoot(
 
     val openSettings: () -> Unit = { backStack.add(SettingsKey) }
     val openEdit: (Long?) -> Unit = { routineId -> backStack.add(EditKey(routineId)) }
+    // 달력에서 고른 날에 추가하면 그날이 루틴 시작일
+    val openAddOn: (LocalDate?) -> Unit = { date -> backStack.add(EditKey(startDate = date?.toString())) }
     // 목록에서 루틴을 열면 정보 화면부터. 고치려면 정보 화면의 「편집하기」
     val openInfo: (Long) -> Unit = { routineId -> backStack.add(InfoKey(routineId)) }
     val goBack: () -> Unit = { backStack.removeLastOrNull() }
@@ -102,7 +106,7 @@ fun RoutineCalendarRoot(
                     TodayRoute(onAdd = { openEdit(null) }, onOpen = openInfo, onOpenSettings = openSettings)
                 }
                 entry<CalendarKey> {
-                    CalendarRoute(onAdd = { openEdit(null) }, onOpen = openInfo, onOpenSettings = openSettings)
+                    CalendarRoute(onAdd = openAddOn, onOpen = openInfo, onOpenSettings = openSettings)
                 }
                 entry<RoutinesKey> {
                     RoutinesRoute(onAdd = { openEdit(null) }, onOpen = openInfo, onOpenSettings = openSettings)
@@ -113,6 +117,7 @@ fun RoutineCalendarRoot(
                 entry<EditKey> { key ->
                     EditRoutineRoute(
                         routineId = key.routineId,
+                        startDate = key.startDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
                         onBack = goBack,
                         onAdded = { title, nextDue, today ->
                             goBack()
@@ -136,8 +141,10 @@ fun RoutineCalendarRoot(
                         onBack = goBack,
                         onOpenPresets = { backStack.add(PresetsKey) },
                         onOpenCategories = { backStack.add(CategoriesKey) },
+                        onOpenNotifyRoutines = { backStack.add(NotifyRoutinesKey) },
                     )
                 }
+                entry<NotifyRoutinesKey> { NotifyRoutinesRoute(onBack = goBack) }
                 entry<PresetsKey> { PresetsRoute(onBack = goBack) }
                 entry<CategoriesKey> { CategoriesRoute(onBack = goBack) }
             },

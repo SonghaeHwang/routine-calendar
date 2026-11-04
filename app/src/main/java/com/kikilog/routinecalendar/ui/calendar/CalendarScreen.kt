@@ -69,8 +69,9 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.number
 
+/** @param onAdd 고른 날짜를 넘긴다 — 등록 화면의 루틴 시작일이 그날로 채워진다 */
 @Composable
-fun CalendarRoute(onAdd: () -> Unit, onOpen: (Long) -> Unit, onOpenSettings: () -> Unit) {
+fun CalendarRoute(onAdd: (LocalDate?) -> Unit, onOpen: (Long) -> Unit, onOpenSettings: () -> Unit) {
     val viewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
     val state by viewModel.state.collectAsStateWithLifecycle()
     val requestNotify = rememberNotificationEnabler(viewModel::onNotifyPermissionResult)
@@ -78,7 +79,7 @@ fun CalendarRoute(onAdd: () -> Unit, onOpen: (Long) -> Unit, onOpenSettings: () 
         state = state,
         onEnableNotify = requestNotify,
         onDismissNotifyCard = viewModel::onDismissNotifyCard,
-        onAdd = onAdd,
+        onAdd = { onAdd(state.selectedDate) },
         onOpen = onOpen,
         onOpenSettings = onOpenSettings,
         onPrevMonth = viewModel::onPrevMonth,

@@ -30,10 +30,14 @@
     <string name="start_date_hint">오늘이나 앞날이면 그날이 첫 예정일이에요. 지난 날이면 그날 한 것으로 보고 주기를 더해요</string>
     <string name="label_notify">알림에 넣기</string>
     <string name="notify_hint">하루 한 번 오는 요약 알림에 넣어요</string>
+    <string name="notify_routines">알림에 넣을 루틴</string>
+    <string name="notify_routines_hint">켜 둔 루틴만 하루 한 번 요약 알림에 나와요</string>
+    <string name="notify_routines_all">모두</string>
+    <string name="notify_routines_empty">등록한 루틴이 없어요</string>
     <string name="error_title_empty">이름을 입력해 주세요</string>
     <string name="error_amount_invalid">1 이상의 숫자를 입력해 주세요</string>
     <string name="error_amount_too_large">365 이하로 입력해 주세요</string>
-    <string name="edit_routine">루틴 수정</string>
+    <string name="edit_routine">루틴 편집</string>
     <string name="edited_message">변경 내용을 저장했어요</string>
     <string name="repeats_locked_hint">이미 한 기록이 있어 바꿀 수 없어요. 한 번만 할 루틴은 새로 등록해 주세요</string>
     <string name="duplicate_hint">같은 이름의 루틴이 있어요</string>
@@ -78,6 +82,8 @@
     <string name="action_archive">보관</string>
     <string name="action_unarchive">보관 해제</string>
     <string name="action_delete">삭제</string>
+    <string name="action_edit">수정</string>
+    <string name="categories_reorder_hint">「수정」 으로 이름 · 색을 바꾸고, 꾹 눌러 끌면 순서가 바뀌어요</string>
     <string name="delete_title">%1$s 삭제할까요?</string>
     <string name="delete_body">완료 기록도 모두 지워지고 되돌릴 수 없어요. 잠시 안 할 루틴이라면 보관을 써 보세요. 보관하면 오늘 화면에서만 빠지고 기록은 남아요.</string>
 
@@ -85,14 +91,9 @@
     <string name="categories_edit">분류 편집</string>
     <string name="routine_info">루틴 정보</string>
     <string name="info_next_due">다음 예정일</string>
-    <string name="info_upcoming">앞으로 예정일</string>
-    <string name="info_created_on">등록일</string>
     <string name="info_edit">편집하기</string>
-    <string name="info_yes">반복</string>
-    <string name="info_no">한 번만</string>
-    <string name="info_on">켜짐</string>
-    <string name="info_off">꺼짐</string>
-    <string name="categories_edit_hint">분류를 더하거나 이름 · 색을 바꿔요</string>
+    <string name="info_tap_to_edit">항목을 누르면 바로 고칠 수 있어요</string>
+    <string name="categories_edit_hint">분류를 더하거나 이름 · 색 · 순서를 바꿔요</string>
     <string name="category_add">분류 추가</string>
     <string name="category_edit">분류 수정</string>
     <string name="category_name">분류 이름</string>
