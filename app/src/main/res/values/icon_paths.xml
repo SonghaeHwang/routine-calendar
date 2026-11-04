@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-        앱 아이콘 고양이 머리 윤곽(108 캔버스). 앞 층 · 단색 층 · 무늬 자르기가 함께 쓴다.
-        가로로 넓은 둥근 머리 + 작은 귀 둘. 귀 끝(34,30) · (74,30)은 중심(54,54)에서 약 31 로 안전 원(반지름 33) 안
+        앱 아이콘 「고양이 귀 달력」 모양(108 캔버스). 앞 층 · 단색 층이 함께 쓴다.
+        귀 끝(36,27) · (72,27)은 중심(54,54)에서 약 32 로 안전 원(반지름 33) 안. 귀를 크게 보이려고 몸통은 조금 작게
     -->
-    <string name="ic_cat_head_path" translatable="false">M54,78 C40,78 28,72 28,60 C28,52 30,46 33,42 L34,31 Q35,27 38.5,28.5 L47,36 Q54,34 61,36 L69.5,28.5 Q73,27 74,31 L75,42 C78,46 80,52 80,60 C80,72 68,78 54,78 Z</string>
+    <string name="ic_cal_ear_left_path" translatable="false">M33,52 L35,31 Q36,26.5 40.5,28.5 L48,44 Z</string>
+    <string name="ic_cal_ear_right_path" translatable="false">M75,52 L73,31 Q72,26.5 67.5,28.5 L60,44 Z</string>
+    <string name="ic_cal_body_path" translatable="false">M40,44 H68 Q75,44 75,51 V72 Q75,79 68,79 H40 Q33,79 33,72 V51 Q33,44 40,44 Z</string>
+    <!-- 날짜 칸 4×3 -->
+    <string name="ic_cal_cells_path" translatable="false">M37,58h7v5h-7z M46,58h7v5h-7z M55,58h7v5h-7z M64,58h7v5h-7z M37,64.5h7v5h-7z M46,64.5h7v5h-7z M55,64.5h7v5h-7z M64,64.5h7v5h-7z M37,71h7v5h-7z M46,71h7v5h-7z M55,71h7v5h-7z M64,71h7v5h-7z</string>
+    <!-- 단색 층용: 몸통 + 날짜 칸을 한 경로로(evenOdd 로 칸이 구멍이 된다). 위 두 값을 바꾸면 여기도 같이 -->
+    <string name="ic_cal_body_with_holes_path" translatable="false">M40,44 H68 Q75,44 75,51 V72 Q75,79 68,79 H40 Q33,79 33,72 V51 Q33,44 40,44 Z M37,58h7v5h-7z M46,58h7v5h-7z M55,58h7v5h-7z M64,58h7v5h-7z M37,64.5h7v5h-7z M46,64.5h7v5h-7z M55,64.5h7v5h-7z M64,64.5h7v5h-7z M37,71h7v5h-7z M46,71h7v5h-7z M55,71h7v5h-7z M64,71h7v5h-7z</string>
 </resources>

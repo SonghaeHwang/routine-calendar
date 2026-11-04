@@ -32,7 +32,7 @@
         <receiver
             android:name=".widget.TodayWidgetReceiver"
             android:exported="false"
-            android:icon="@drawable/ic_widget_cat"
+            android:icon="@mipmap/ic_launcher"
             android:label="@string/widget_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

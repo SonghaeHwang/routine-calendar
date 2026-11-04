@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    앱 아이콘 앞 층: 삼색 고양이 얼굴(res/drawable-nodpi/ic_widget_cat.png 를 참고해 벡터로 다시 그림).
-    108dp 캔버스, 귀 끝까지 가운데 지름 66dp 안전 원 안(중심에서 약 31dp)에 둬서 어떤 모양으로 잘려도 귀가 남는다.
-    뒤 층이 흰색이라 얼굴은 옅은 크림색 + 연한 테두리로 구분한다.
+    앱 아이콘 앞 층: 삼색 고양이 귀가 달린 크림색 달력(2026-11-04 사용자가 준 펠트 그림을 벡터로 다시 그림).
+    왼쪽 귀 주황 · 오른쪽 귀 고동색, 고리 둘, 날짜 칸 4×3. 뒤 층이 흰색이라 몸통은 크림색 + 연한 테두리로 구분한다.
+    모양 경로는 values/icon_paths.xml (단색 층과 공용)
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -10,35 +10,44 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- 얼굴 바탕 -->
+    <!-- 귀는 몸통 뒤에 -->
     <path
-        android:fillColor="#FFFFFBF4"
-        android:pathData="@string/ic_cat_head_path" />
-
-    <!-- 무늬는 얼굴 모양 안에서만 보이게 자른다 -->
-    <group>
-        <clip-path android:pathData="@string/ic_cat_head_path" />
-        <!-- 왼쪽 귀 ~ 이마 주황 -->
-        <path
-            android:fillColor="#FFF0A04B"
-            android:pathData="M20,18 L62,18 C60,34 52,44 40,48 C33,50 26,50 20,50 Z" />
-        <!-- 오른쪽 귀 고동색 -->
-        <path
-            android:fillColor="#FF6E4F43"
-            android:pathData="M61,18 L90,18 L90,46 C82,46 72,42 65,34 C62,30 61,24 61,18 Z" />
-        <!-- 왼쪽 볼 고동색 -->
-        <path
-            android:fillColor="#FF6E4F43"
-            android:pathData="M21,66 a8,10 0 1,0 16,0 a8,10 0 1,0 -16,0 Z" />
-        <!-- 오른쪽 볼 주황 -->
-        <path
-            android:fillColor="#FFF0A04B"
-            android:pathData="M69,65 a10,11 0 1,0 20,0 a10,11 0 1,0 -20,0 Z" />
-    </group>
-
-    <!-- 흰 뒤 층과 구분되는 연한 테두리 -->
+        android:fillColor="#FFE8A04E"
+        android:pathData="@string/ic_cal_ear_left_path" />
     <path
-        android:pathData="@string/ic_cat_head_path"
+        android:fillColor="#FF6B4E44"
+        android:pathData="@string/ic_cal_ear_right_path" />
+
+    <!-- 몸통 -->
+    <path
+        android:fillColor="#FFF6E9D7"
+        android:pathData="@string/ic_cal_body_path"
         android:strokeWidth="1.2"
-        android:strokeColor="#FFE3D3C1" />
+        android:strokeColor="#FFE3CFB4" />
+
+    <!-- 머리띠 아래 구분선 -->
+    <path
+        android:pathData="M34,55 H74"
+        android:strokeWidth="1"
+        android:strokeColor="#FFE3CFB4" />
+
+    <!-- 날짜 칸: 같은 색 둥근 테두리로 모서리를 부드럽게 -->
+    <path
+        android:fillColor="#FFEBD8BE"
+        android:pathData="@string/ic_cal_cells_path"
+        android:strokeWidth="1.2"
+        android:strokeColor="#FFEBD8BE"
+        android:strokeLineJoin="round" />
+
+    <!-- 고리 둘 -->
+    <path
+        android:fillColor="#FFFBF3E8"
+        android:pathData="M42,40 Q42,37 45,37 Q48,37 48,40 V47 Q48,50 45,50 Q42,50 42,47 Z"
+        android:strokeWidth="1"
+        android:strokeColor="#FFDCC6AA" />
+    <path
+        android:fillColor="#FFFBF3E8"
+        android:pathData="M60,40 Q60,37 63,37 Q66,37 66,40 V47 Q66,50 63,50 Q60,50 60,47 Z"
+        android:strokeWidth="1"
+        android:strokeColor="#FFDCC6AA" />
 </vector>
