@@ -221,7 +221,8 @@
     - 저장소 공개 + GitHub Pages(main /docs). 방침 `docs/privacy/index.md` → `https://songhaehwang.github.io/routine-calendar/privacy/` 열림 확인. 연락 이메일은 개인 메일
     - 설정 화면 「개인정보처리방침」(브라우저) · 「의견 보내기」(mailto, 제목 · 앱 버전 · Android 버전 미리 채움). 인터넷 권한 · `<queries>` 없이 다른 앱에 넘김. S26 에서 Chrome · Gmail 로 확인
     - release 서명 설정: 루트 `keystore.properties` 가 있을 때만 업로드 키로 서명. 키 없이 `bundleRelease` 통과, release 병합 권한 확인
-  - 남은 것: ① 업로드 키 만들기 · `keystore.properties`(사용자, store.md 5절) ② release APK 를 S26 에서 눌러 보기(디버그 앱과 서명이 달라 지워야 하면 JSON 내보내기 먼저, 지우기 전 사용자 확인) ③ Play 아이콘 512×512(더 큰 원본 필요) · 그래픽 1024×500 ④ 스토어 문구 · 스크린샷 ⑤ 데이터 보안 양식 ⑥ `versionName` 확정
+    - 업로드 키 생성(저장소 밖) + `keystore.properties`, `validateSigningRelease` 통과. Play 아이콘 512 원본 `docs/store/play-icon-512.png`
+  - 남은 것: ① 키 파일 · 비밀번호 백업(사용자) ② release APK 를 S26 에서 눌러 보기(디버그 앱과 서명이 달라 지워야 하면 JSON 내보내기 먼저, 지우기 전 사용자 확인) ③ Play 아이콘 512×512(더 큰 원본 필요) · 그래픽 1024×500 ④ 스토어 문구 · 스크린샷 ⑤ 데이터 보안 양식 ⑥ `versionName` 확정
 - [ ] **10. 비공개 테스트 → 출시** — 테스터 12명 이상 · 14일 연속(2023-11-13 이후 개인 계정 조건), 받은 의견 반영, 프로덕션 신청
 
 ## 4. 포트폴리오로 남길 것
