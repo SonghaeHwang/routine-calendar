@@ -41,6 +41,15 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/today_widget_info" />
         </receiver>
+
+        <!-- 앱 업데이트 뒤 위젯 다시 그리기. MY_PACKAGE_REPLACED 는 시스템이 이 앱에만 보낸다(권한 없음) -->
+        <receiver
+            android:name=".widget.WidgetUpdateReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
