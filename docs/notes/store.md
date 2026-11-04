@@ -297,7 +297,7 @@ android {
 | 서명 키 유효 기간 | 2033-10-22 이후 만료 | 25년 이상으로 생성 |
 | release 실기기 시험 | 휴대폰 · 태블릿 크기 각 1대 권장 | S26 만. 태블릿은 없음 → 큰 화면은 Studio 미리보기 정도 **(추론)** |
 | AAB 크기 | 압축 다운로드 4GB 이하 | 해당 없음 |
-| 앱 안 방침 링크 | privacy.md 8절 | 아직 안 함 |
+| 앱 안 방침 링크 | privacy.md 8절 | 2026-11-04 설정 화면에 「개인정보처리방침」(브라우저) · 「의견 보내기」(메일 앱) 넣음 |
 | 비공개 테스트 | 개인 계정: 테스터 12명 이상 · 14일 연속 | PLAN 10단계 |
 
 출처: [Version your app](https://developer.android.com/studio/publish/versioning) · [Prepare your app for release](https://developer.android.com/studio/publish/preparing) · [About Android App Bundles](https://developer.android.com/guide/app-bundle)
@@ -391,12 +391,12 @@ android {
 
 **코드로 할 단계 (Claude)**
 
-- [ ] ⑫ `app_name` 등 이름 문자열 바꾸기(이름 확정 뒤, 위젯 설명 · 알림 채널 이름 등 함께 검색)
-- [ ] ⑬ `app/build.gradle.kts` 에 `keystore.properties` 읽기 + `signingConfigs` (파일 없으면 건너뜀). 새 라이브러리 · 버전 문자열 없음
-- [ ] ⑭ `bundleRelease` 시험: `packageScope` + `android.r8.gradual.support` 여부 확인, 오류 · 경고 기록
+- [x] ⑫ `app_name` 등 이름 문자열 바꾸기(이름 확정 뒤, 위젯 설명 · 알림 채널 이름 등 함께 검색) — 2026-11-04 「때됐냥」
+- [x] ⑬ `app/build.gradle.kts` 에 `keystore.properties` 읽기 + `signingConfigs` (파일 없으면 건너뜀). 새 라이브러리 · 버전 문자열 없음 — 2026-11-04
+- [x] ⑭ `bundleRelease` 시험: `packageScope` + `android.r8.gradual.support` 여부 확인, 오류 · 경고 기록 — 2026-11-04 키 없이 통과(약 5분). `android.r8.gradual.support` 없이도 R8 오류 · 경고 없음(AGP 9.5). 나온 것: Kotlin 경고 1건(`EditRoutineScreen.kt` when 의 null 비교), 네이티브 라이브러리 2개 strip 불가 안내(그대로 포장)
 - [ ] ⑮ release APK 를 S26 에 설치해 6절 확인 항목 전부 눌러 보기(디버그 앱과 서명이 달라 먼저 디버그 앱 삭제가 필요할 수 있음 → **데이터가 지워지므로 JSON 내보내기 먼저**) **(추론)**
 - [ ] ⑯ (안정되면) `packageScope` 지우고 앱 전체 최적화 → ⑮ 다시
-- [ ] ⑰ release 병합 Manifest 권한 다시 확인(privacy.md ⑨)
+- [x] ⑰ release 병합 Manifest 권한 다시 확인(privacy.md ⑨) — 2026-11-04 `POST_NOTIFICATIONS` · `WAKE_LOCK` · `ACCESS_NETWORK_STATE` · `RECEIVE_BOOT_COMPLETED` · `FOREGROUND_SERVICE` · 앱 전용 `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` 뿐. `INTERNET` · 정확한 알람 · `AD_ID` 없음
 - [ ] ⑱ 시연용 JSON 만들기(저장소에 둘지 열린 질문)
 - [ ] ⑲ `versionCode` · `versionName` 확정(첫 업로드 1 / 「1.0.0」 등)
 - [ ] ⑳ `.\gradlew.bat test assembleDebug` → 커밋 · DEVLOG(키 경로 · 비밀번호 · 지문 적지 않음) → PLAN 9단계 체크 갱신
