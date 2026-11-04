@@ -127,6 +127,12 @@
     <!-- 설정 -->
     <string name="settings_privacy_title">개인정보</string>
     <string name="settings_privacy_body">모든 기록은 이 휴대폰에 저장돼요. 앱은 인터넷에 연결하지 않고 아무것도 수집 · 공유하지 않아요. 휴대폰의 Google 백업을 켜 두면 내 Google 계정에 암호화되어 저장될 수 있고, 개발자는 그 내용을 볼 수 없어요.</string>
+    <string name="settings_privacy_policy">개인정보처리방침</string>
+    <string name="settings_privacy_policy_hint">웹 페이지로 열려요</string>
+    <string name="settings_no_browser">웹 페이지를 열 앱을 찾지 못했어요</string>
+    <string name="settings_feedback">의견 보내기</string>
+    <string name="settings_feedback_hint">메일 앱으로 보내요 · %1$s</string>
+    <string name="settings_no_mail_app">메일 앱이 없어요. %1$s 로 보내 주세요</string>
     <string name="settings_version">앱 버전</string>
     <string name="settings_presets">빠른 선택 편집</string>
     <string name="settings_presets_hint">루틴 등록 화면 위쪽의 빠른 선택 목록을 고쳐요</string>

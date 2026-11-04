@@ -1,5 +1,6 @@
 package com.kikilog.routinecalendar.ui.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,9 @@ import com.kikilog.routinecalendar.core.notify.NOTIFY_TIME_OPTIONS
 import com.kikilog.routinecalendar.core.notify.NotifyTime
 import com.kikilog.routinecalendar.data.StartScreen
 import com.kikilog.routinecalendar.ui.common.ChoiceRow
+import com.kikilog.routinecalendar.ui.common.FEEDBACK_EMAIL
+import com.kikilog.routinecalendar.ui.common.openFeedbackMail
+import com.kikilog.routinecalendar.ui.common.openPrivacyPolicy
 import com.kikilog.routinecalendar.ui.common.SubScaffold
 import com.kikilog.routinecalendar.ui.common.openAppNotificationSettings
 import com.kikilog.routinecalendar.ui.common.openBatteryOptimizationSettings
@@ -49,7 +53,7 @@ import com.kikilog.routinecalendar.ui.format.notifyTimeLabel
 import kotlinx.datetime.DayOfWeek
 
 /**
- * 설정 화면: 알림 · 주 시작 요일 · 첫 화면 · 분류 · 빠른 선택 편집 · 백업 · 개인정보 안내 · 앱 버전.
+ * 설정 화면: 알림 · 주 시작 요일 · 첫 화면 · 분류 · 빠른 선택 편집 · 백업 · 개인정보 안내 · 방침 링크 · 의견 보내기 · 앱 버전.
  */
 @Composable
 fun SettingsScreen(
@@ -123,6 +127,25 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_privacy_title)) },
                 supportingContent = { Text(stringResource(R.string.settings_privacy_body)) },
+            )
+            HorizontalDivider()
+            // 브라우저 · 메일 앱을 열 뿐 앱은 인터넷에 연결하지 않는다. 열 앱이 없으면 짧게 알린다
+            val noBrowser = stringResource(R.string.settings_no_browser)
+            ListItem(
+                modifier = Modifier.clickable {
+                    if (!openPrivacyPolicy(context)) Toast.makeText(context, noBrowser, Toast.LENGTH_SHORT).show()
+                },
+                headlineContent = { Text(stringResource(R.string.settings_privacy_policy)) },
+                supportingContent = { Text(stringResource(R.string.settings_privacy_policy_hint)) },
+            )
+            HorizontalDivider()
+            val noMailApp = stringResource(R.string.settings_no_mail_app, FEEDBACK_EMAIL)
+            ListItem(
+                modifier = Modifier.clickable {
+                    if (!openFeedbackMail(context, versionName)) Toast.makeText(context, noMailApp, Toast.LENGTH_LONG).show()
+                },
+                headlineContent = { Text(stringResource(R.string.settings_feedback)) },
+                supportingContent = { Text(stringResource(R.string.settings_feedback_hint, FEEDBACK_EMAIL)) },
             )
             HorizontalDivider()
             ListItem(
