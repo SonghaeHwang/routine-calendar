@@ -38,6 +38,8 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.semantics.contentDescription
+import androidx.glance.semantics.semantics
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextDecoration
@@ -150,9 +152,14 @@ private fun RoutineRow(row: WidgetRow, state: WidgetState, compact: Boolean, ope
     ) {
         CategoryDot(row.colorArgb)
         Spacer(GlanceModifier.width(4.dp))
+        // 체크 칸 글자(CheckBox text)에는 취소선이 One UI 에서 적용되지 않아 이름은 따로 그린다.
+        // 화면 읽기용 이름은 체크 칸 설명으로 붙인다
         CheckBox(
             checked = row.doneToday,
             onCheckedChange = actionRunCallback<ToggleRoutineAction>(toggleParameters(row, state.today)),
+            modifier = GlanceModifier.semantics { contentDescription = row.title },
+        )
+        Text(
             text = row.title,
             style = TextStyle(
                 color = if (row.doneToday) GlanceTheme.colors.onSurfaceVariant else GlanceTheme.colors.onSurface,
